@@ -1,6 +1,7 @@
 package com.main.classes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FireFox extends Pet {
 
@@ -9,6 +10,9 @@ public class FireFox extends Pet {
         this.name = "FireFox";
         this.type = "Fire Element Pet";
         this.elements = new Element[]{Element.fire}; // 明确元素属性
+        for (int i = 0;i < 50;i++){
+            levelExpRequirements.put(i+1,50 + 30*i);
+        }
         setBaseValue();
         unifiedValue();
     }

@@ -4,21 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/petFightGame.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/classes/Attributes.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/classes/Element.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/classes/FireFox.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/classes/Pet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/classes/Player.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/classes/Skill.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/game/main.java" afterDir="false" />
+    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/Attributes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/Attributes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/FireFox.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/FireFox.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/Pet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/Pet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/game/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,12 +23,32 @@
       </list>
     </option>
   </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="master" />
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 4
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Mine-diamond"
+  }
 }]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Mine-diamond/petFightGame",
+    "accountId": "7a6e9d55-2eb3-4880-9200-b2ec1217a6de"
+  }
+}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="2ulUJiak4PVd94dqJuNRJNVONTy" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -48,7 +59,7 @@
   "keyToString": {
     "Application.main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -76,11 +87,48 @@
       <option name="presentableId" value="Default" />
       <updated>1742822586646</updated>
       <workItem from="1742822587727" duration="10560000" />
+      <workItem from="1742882670882" duration="5197000" />
     </task>
+    <task id="LOCAL-00001" summary="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
+      <option name="closed" value="true" />
+      <created>1742882992772</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1742882992772</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="first commit，添加了Pet类与FireFox子类，但是还没有做完。" />
+    <option name="LAST_COMMIT_MESSAGE" value="first commit，添加了Pet类与FireFox子类，但是还没有做完。" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
