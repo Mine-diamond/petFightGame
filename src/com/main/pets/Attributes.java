@@ -1,4 +1,4 @@
-package com.main.classes;
+package com.main.pets;
 
 public enum Attributes {
     Offensive(1.15, 1.0, 0.9, 1.0),    // 攻击+15%，防御-10%

@@ -1,10 +1,20 @@
-package com.main.classes;
+package com.main.pets;
+
+import com.main.classes.Element;
+import com.main.skills.Skill;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 
 public abstract class Pet {
+
+    enum Statue{
+        Fight,Free
+    }
+
     String name;//姓名
     String type;//种类
 
@@ -27,15 +37,17 @@ public abstract class Pet {
 
     Attributes attributes;//天赋
     Element[] elements;//元素
-    ArrayList<Skill> skills;//技能集合
+    LinkedHashSet<Skill> skills;//技能集合
     GrowthAttribute growth;//能力随等级成长曲线
+
+    Statue statue;
 
     HashMap<Integer,Integer> levelExpRequirements = new HashMap<>();//升级需要的经验值
 
-    public Pet(int level,Attributes attributes,ArrayList<Skill> skills) {
+    public Pet(int level,Attributes attributes,LinkedHashSet<Skill> skills) {
         this.level = level;
         this.attributes = attributes;
-        this.skills = skills != null ? skills : new ArrayList<>();
+        this.skills = skills != null ? skills : new LinkedHashSet<>();
         this.experience = 0;
         this.growth = createGrowthAttribute(); // 工厂方法创建成长属性
         //其他变量初始化
@@ -167,6 +179,14 @@ public abstract class Pet {
         }
     }
 
+    public int getAttackValue(int attack){
+        return (attack - currentDefense) > 0 ? attack - currentDefense : 0;
+    }
+
+    public int getRecover(int recover){
+        return recover;
+    }
+
     public void addEnergy(int energy){//增加能量
         if(energy < 0){
             throw new IllegalArgumentException("energy must be a positive integer");
@@ -192,6 +212,53 @@ public abstract class Pet {
             return true;
         }
     }
+
+    public boolean addSkills(Skill skills){
+        return this.skills.add(skills);
+    }
+
+    public int getBaseMaxHP(){
+        return baseMaxHP;
+    }
+
+    public int getMaxHP(){
+        return maxHP;
+    }
+
+    public int getCurrentHP(){
+        return currentHP;
+    }
+
+    public int getMaxEnergy(){
+        return maxEnergy;
+    }
+
+    public int getBaseMaxEnergy(){
+        return baseMaxEnergy;
+    }
+
+    public int getCurrentEnergy(){
+        return currentEnergy;
+    }
+
+    public int getBaseAttack(){
+        return baseAttack;
+    }
+
+    public int getCurrentAttack(){
+        return currentAttack;
+    }
+
+    public int getBaseDefense(){
+        return baseDefense;
+    }
+
+    public int getCurrentDefense(){
+        return currentDefense;
+    }
+
+
+
 }
 
 

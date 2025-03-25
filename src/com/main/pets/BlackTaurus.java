@@ -1,14 +1,17 @@
-package com.main.classes;
+package com.main.pets;
+
+import com.main.classes.Element;
+import com.main.skills.Skill;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashSet;
 
-public class FireFox extends Pet {
+public class BlackTaurus extends Pet {
 
-    public FireFox(int level, Attributes attributes, ArrayList<Skill> skills) {
+    public BlackTaurus(int level, Attributes attributes, LinkedHashSet<Skill> skills) {
         super(level, attributes, skills);
-        this.name = "FireFox";
-        this.type = "Fire Element Pet";
+        this.name = "黑金牛";
+        this.type = "黑金牛";
         this.elements = new Element[]{Element.fire}; // 明确元素属性
         for (int i = 0;i < 50;i++){
             levelExpRequirements.put(i+1,50 + 30*i);
@@ -16,32 +19,33 @@ public class FireFox extends Pet {
         setBaseValue();
         unifiedValue();
     }
+
+
     @Override
     protected GrowthAttribute createGrowthAttribute() {
-        return new FireFoxGrowth();
+        return new BlackTaurusGrowth();
     }
 
-
-    class FireFoxGrowth extends Pet.GrowthAttribute {
+    class BlackTaurusGrowth extends Pet.GrowthAttribute {
 
 
         public int getHpGrowth() {
-            return 50;
+            return 250;
         }
 
 
         public int getAttackGrowth() {
-            return 70;
+            return 90;
         }
 
 
         public int getDefenseGrowth() {
-            return 30;
+            return 50;
         }
 
 
         public int getEnergyGrowth() {
-            return 50;
+            return 30;
         }
     }
 }
