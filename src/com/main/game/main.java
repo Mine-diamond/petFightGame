@@ -20,32 +20,13 @@ public class main {
         player.pets.add(new FireFox(2, Attributes.Offensive,new LinkedHashSet<>()));
         Pet pet1 = player.pets.get(0);
         pet1.addSkills(SkillLibrary.skillFireBall);
+        pet1.addSkills(SkillLibrary.skillFireBall);
+        pet1.addSkills(SkillLibrary.skillEarthShattering);
 
         player.pets.add(new BlackTaurus(2, Attributes.Defensive,new LinkedHashSet<>()));
         Pet pet2 = player.pets.get(1);
         pet2.addSkills(SkillLibrary.skillFireBall);
 
-        System.out.println(pet1.toString());
-        System.out.println(pet2.toString());
-
-        SkillLibrary.skillFireBall.applyEffect(pet1,pet2);
-
-        System.out.println(pet1.toString());
-        System.out.println(pet2.toString());
-
-        SkillLibrary.skillFireBall.applyEffect(pet1,pet2);
-
-        System.out.println(pet1.toString());
-        System.out.println(pet2.toString());
-
-        SkillLibrary.skillFireBall.applyEffect(pet1,pet2);
-
-        System.out.println(pet1.toString());
-        System.out.println(pet2.toString());
-
-        SkillLibrary.skillFireBall.applyEffect(pet1,pet2);
-
-        System.out.println(pet1.toString());
-        System.out.println(pet2.toString());
+        System.out.println(pet1.getAllSkills());
     }
 }

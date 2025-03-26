@@ -56,5 +56,10 @@ public abstract class Skill {
             };
         }
     }
+
+
+    public String toString() {
+        return name + " " + element.toString() + " " + energyCost + " " + type.toString() + " " + targetType.toString();
+    }
 }
 

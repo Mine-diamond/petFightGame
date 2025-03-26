@@ -3,18 +3,19 @@ package com.main.pets;
 import com.main.classes.Element;
 import com.main.skills.Skill;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.*;
+import java.util.function.Consumer;
 
-
+/**
+ * 宠物抽象基类，定义了所有宠物的共有属性和行为
+ */
 public abstract class Pet {
 
-    enum Statue{
-        Fight,Free
+    enum Statue {
+        Fight, Free
     }
 
+    //------------------------基本属性--------------------------
     String name;//姓名
     String type;//种类
 
@@ -40,11 +41,18 @@ public abstract class Pet {
     LinkedHashSet<Skill> skills;//技能集合
     GrowthAttribute growth;//能力随等级成长曲线
 
-    Statue statue;
+    Statue statue = Statue.Free;//状态
 
     HashMap<Integer,Integer> levelExpRequirements = new HashMap<>();//升级需要的经验值
 
-    public Pet(int level,Attributes attributes,LinkedHashSet<Skill> skills) {
+    //------------------------构造方法--------------------------
+    /**
+     * 宠物构造函数
+     * @param level 初始等级
+     * @param attributes 天赋属性
+     * @param skills 初始技能集
+     */
+    public Pet(int level, Attributes attributes, LinkedHashSet<Skill> skills) {
         this.level = level;
         this.attributes = attributes;
         this.skills = skills != null ? skills : new LinkedHashSet<>();
@@ -55,9 +63,15 @@ public abstract class Pet {
         unifiedValue();
     }
 
-    // 抽象方法：子类必须实现成长属性逻辑
+    //------------------------抽象方法与内部类--------------------------
+    /**
+     * 创建宠物成长属性的抽象方法，由子类实现
+     */
     protected abstract GrowthAttribute createGrowthAttribute();
 
+    /**
+     * 宠物成长属性抽象类，定义了成长相关的抽象方法
+     */
     public static abstract class GrowthAttribute {
         public abstract int getHpGrowth();
         public abstract int getAttackGrowth();
@@ -65,6 +79,10 @@ public abstract class Pet {
         public abstract int getEnergyGrowth();
     }
 
+    //------------------------属性计算方法--------------------------
+    /**
+     * 根据等级和天赋设置基础属性值
+     */
     protected void setBaseValue() {
         double attackMultiplier = attributes.getAttackMultiplier();
         double defenseMultiplier = attributes.getDefenseMultiplier();
@@ -77,8 +95,10 @@ public abstract class Pet {
         baseDefense = (int) (growth.getDefenseGrowth() * level * defenseMultiplier);
     }
 
-
-    public void unifiedValue(){
+    /**
+     * 统一更新当前属性为基础属性值
+     */
+    public void unifiedValue() {
         maxHP = baseMaxHP;
         currentHP = baseMaxHP;
 
@@ -87,59 +107,57 @@ public abstract class Pet {
 
         currentDefense = baseDefense;
         currentAttack = baseAttack;
-
     }
 
-
-    @Override
-    public String toString() {
-        return String.format(
-                "%s [name=%s, type=%s, level=%d, exp=%d, HP=%d/%d, ATK=%d, DEF=%d]",
-                getClass().getSimpleName(), name, type, level, experience, currentHP, maxHP, currentAttack, currentDefense
-        );
-    }
-
-    public void setName(String name){
+    //------------------------基本信息相关方法--------------------------
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    public void setType(String type){
+    public void setType(String type) {
         this.type = type;
     }
 
-    public String getType(){
+    public String getType() {
         return type;
     }
 
-    public void setLevel(int level){
+    public void setLevel(int level) {
         this.level = level;
     }
 
-    public int getLevel(){
+    public int getLevel() {
         return level;
     }
 
-    public void setExperience(int experience){
+    //------------------------经验与升级相关方法--------------------------
+    public void setExperience(int experience) {
         this.experience = experience;
     }
 
-    public int getExperience(){
+    public int getExperience() {
         return experience;
     }
 
-    public boolean addExperience(int experience){//增加经验，升级时返回true
-
-        if(experience < 0){
+    /**
+     * 增加经验值，并处理可能的升级
+     * @param experience 要增加的经验值
+     * @return 是否发生升级
+     */
+    public boolean addExperience(int experience) {
+        if(experience < 0) {
             throw new IllegalArgumentException("experience must be a positive integer");
         }
 
-        if (level >= levelExpRequirements.size()) {return false;}
+        if (level >= levelExpRequirements.size()) {
+            return false;
+        }
 
-        if(this.experience + experience >= levelExpRequirements.get(level)){
+        if(this.experience + experience >= levelExpRequirements.get(level)) {
             experience -= levelExpRequirements.get(level) - this.experience;
             level++;
             setBaseValue();//更新属性变量值
@@ -147,121 +165,191 @@ public abstract class Pet {
             this.experience = 0;
             addExperience(experience);
             return true;//升级
-        }else {
+        } else {
             this.experience += experience;
             return false;//未升级
         }
     }
 
-    public void addHP(int hp){//增加血量
-        if(hp < 0){
+    //------------------------血量相关方法--------------------------
+    public int getBaseMaxHP() {
+        return baseMaxHP;
+    }
+
+    public int getMaxHP() {
+        return maxHP;
+    }
+
+    public int getCurrentHP() {
+        return currentHP;
+    }
+
+    /**
+     * 增加血量
+     * @param hp 要增加的血量
+     */
+    public void addHP(int hp) {
+        if(hp < 0) {
             throw new IllegalArgumentException("hp must be a positive integer");
         }
 
         if (this.currentHP + hp >= maxHP) {
             currentHP = maxHP;
-        }else {
+        } else {
             currentHP += hp;
         }
     }
 
-    public boolean removeHP(int hp){//减少血量，为0（死亡）时返回true
-        if(hp < 0){
+    /**
+     * 减少血量
+     * @param hp 要减少的血量
+     * @return 是否死亡（HP降为0）
+     */
+    public boolean removeHP(int hp) {
+        if(hp < 0) {
             throw new IllegalArgumentException("hp must be a positive integer");
         }
 
         if (this.currentHP - hp >= 0) {
             currentHP -= hp;
             return false;
-        }else {
+        } else {
             this.currentHP = 0;
             return true;
         }
     }
 
-    public int getAttackValue(int attack){
-        return (attack - currentDefense) > 0 ? attack - currentDefense : 0;
+    //------------------------能量相关方法--------------------------
+    public int getMaxEnergy() {
+        return maxEnergy;
     }
 
-    public int getRecover(int recover){
-        return recover;
+    public int getBaseMaxEnergy() {
+        return baseMaxEnergy;
     }
 
-    public void addEnergy(int energy){//增加能量
-        if(energy < 0){
+    public int getCurrentEnergy() {
+        return currentEnergy;
+    }
+
+    /**
+     * 增加能量
+     * @param energy 要增加的能量
+     */
+    public void addEnergy(int energy) {
+        if(energy < 0) {
             throw new IllegalArgumentException("energy must be a positive integer");
         }
 
         if (this.currentEnergy + energy >= maxEnergy) {
             currentEnergy = maxEnergy;
-        }else {
+        } else {
             currentEnergy += energy;
         }
     }
 
-    public boolean removeEnergy(int energy){//减少能量，为0时返回true
-        if(energy < 0){
+    /**
+     * 减少能量
+     * @param energy 要减少的能量
+     * @return 能量是否耗尽
+     */
+    public boolean removeEnergy(int energy) {
+        if(energy < 0) {
             throw new IllegalArgumentException("energy must be a positive integer");
         }
 
         if (this.currentEnergy - energy >= 0) {
             currentEnergy -= energy;
             return false;
-        }else {
+        } else {
             this.currentEnergy = 0;
             return true;
         }
     }
 
-    public boolean addSkills(Skill skills){
-        return this.skills.add(skills);
-    }
-
-    public int getBaseMaxHP(){
-        return baseMaxHP;
-    }
-
-    public int getMaxHP(){
-        return maxHP;
-    }
-
-    public int getCurrentHP(){
-        return currentHP;
-    }
-
-    public int getMaxEnergy(){
-        return maxEnergy;
-    }
-
-    public int getBaseMaxEnergy(){
-        return baseMaxEnergy;
-    }
-
-    public int getCurrentEnergy(){
-        return currentEnergy;
-    }
-
-    public int getBaseAttack(){
+    //------------------------攻击与防御相关方法--------------------------
+    public int getBaseAttack() {
         return baseAttack;
     }
 
-    public int getCurrentAttack(){
+    public int getCurrentAttack() {
         return currentAttack;
     }
 
-    public int getBaseDefense(){
+    public int getBaseDefense() {
         return baseDefense;
     }
 
-    public int getCurrentDefense(){
+    public int getCurrentDefense() {
         return currentDefense;
     }
 
+    /**
+     * 计算实际受到的攻击伤害
+     * @param attack 原始攻击值
+     * @return 经过防御计算后的实际伤害
+     */
+    public int getAttackValue(int attack) {
+        return (attack - currentDefense) > 0 ? attack - currentDefense : 0;
+    }
 
+    /**
+     * 计算恢复量
+     * @param recover 恢复量
+     * @return 实际恢复量
+     */
+    public int getRecover(int recover) {
+        return recover;
+    }
 
+    //------------------------技能相关方法--------------------------
+    /**
+     * 添加技能
+     * @param skill 要添加的技能
+     * @return 是否成功添加
+     */
+    public boolean addSkills(Skill skill) {
+        return this.skills.add(skill);
+    }
+
+    /**
+     * 获取所有技能的字符串表示
+     * @return 格式化的技能列表字符串
+     */
+    public String getAllSkills() {
+        StringBuilder skillsStr = new StringBuilder();
+        for (Skill skill : skills) {
+            skillsStr.append(skill.toString()).append("\n");
+        }
+        return skillsStr.toString();
+    }
+
+    /**
+     * 获取技能数组
+     * @return 所有技能的数组
+     */
+    public Skill[] getSkillsArray() {
+        return this.skills.toArray(new Skill[0]);
+    }
+
+    //------------------------状态相关方法--------------------------
+    /**
+     * 设置宠物状态
+     * @param statue 新状态
+     */
+    public void setStatue(Statue statue) {
+        this.statue = statue;
+        if(statue == Statue.Free) {
+            unifiedValue();
+        }
+    }
+
+    //------------------------辅助方法--------------------------
+    @Override
+    public String toString() {
+        return String.format(
+                "%s [name=%s, type=%s, level=%d, exp=%d, HP=%d/%d, ATK=%d, DEF=%d]",
+                getClass().getSimpleName(), name, type, level, experience, currentHP, maxHP, currentAttack, currentDefense
+        );
+    }
 }
-
-
-
-
-

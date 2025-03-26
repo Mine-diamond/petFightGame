@@ -18,5 +18,20 @@ public class SkillLibrary {
 
             ).build();
 
+    public static final Skill skillEarthShattering = new Skill.SkillBuilder()
+            .setName("震地术")
+            .setElement(Element.earth)
+            .setType(Skill.SkillType.ATTACK)
+            .setTargetType(Skill.TargetType.ENEMY)
+            .setEnergyCost(30)
+            .setEffect(
+                    (caster, target) -> {
+                        int damage = caster.getBaseAttack();
+                        target.removeHP(damage);
+                    }
+
+            ).build();
+
+
 }
 
