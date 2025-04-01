@@ -9,7 +9,7 @@ public class SkillLibrary {
             .setElement(Element.fire)
             .setType(Skill.SkillType.ATTACK)
             .setTargetType(Skill.TargetType.ENEMY)
-            .setEnergyCost(20)
+            .setEnergyCost(20,true)
             .setEffect(
                     (caster, target) -> {
                         int damage = caster.getBaseAttack();
@@ -23,7 +23,7 @@ public class SkillLibrary {
             .setElement(Element.earth)
             .setType(Skill.SkillType.ATTACK)
             .setTargetType(Skill.TargetType.ENEMY)
-            .setEnergyCost(30)
+            .setEnergyCost(30,true)
             .setEffect(
                     (caster, target) -> {
                         int damage = caster.getBaseAttack();

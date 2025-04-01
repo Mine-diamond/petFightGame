@@ -284,23 +284,6 @@ public abstract class Pet {
         return currentDefense;
     }
 
-    /**
-     * 计算实际受到的攻击伤害
-     * @param attack 原始攻击值
-     * @return 经过防御计算后的实际伤害
-     */
-    public int getAttackValue(int attack) {
-        return (attack - currentDefense) > 0 ? attack - currentDefense : 0;
-    }
-
-    /**
-     * 计算恢复量
-     * @param recover 恢复量
-     * @return 实际恢复量
-     */
-    public int getRecover(int recover) {
-        return recover;
-    }
 
     //------------------------技能相关方法--------------------------
     /**
@@ -348,8 +331,8 @@ public abstract class Pet {
     @Override
     public String toString() {
         return String.format(
-                "%s [name=%s, type=%s, level=%d, exp=%d, HP=%d/%d, ATK=%d, DEF=%d]",
-                getClass().getSimpleName(), name, type, level, experience, currentHP, maxHP, currentAttack, currentDefense
+                "%s [name=%s, type=%s, level=%d, exp=%d, HP=%d/%d,Energy=%d/%d, ATK=%d, DEF=%d]",
+                getClass().getSimpleName(), name, type, level, experience, currentHP, maxHP,currentEnergy, maxEnergy,currentAttack, currentDefense
         );
     }
 }

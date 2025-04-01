@@ -12,5 +12,16 @@ public class BattleSystem {
 
     }
 
+    public static int getAttackValue(int attcak){
+        return 0;
+    }
+
+    public static int getEnergyCost(int costEnergy, Pet pet){
+        return pet.getCurrentEnergy() - costEnergy > 0 ? costEnergy : 0;
+    }
+
+    public int getRecover(int recover) {
+        return recover;
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.main.skills;
 
 import com.main.classes.Element;
+import com.main.game.BattleSystem;
 import com.main.pets.Pet;
 
 public abstract class Skill {
@@ -8,6 +9,7 @@ public abstract class Skill {
     protected String name;
     protected Element element;
     protected int energyCost;
+    protected boolean ifEnergyCost;
     protected SkillType type;
     protected TargetType targetType;
 
@@ -20,12 +22,13 @@ public abstract class Skill {
     }
 
     // 构造器（子类调用）
-    protected Skill(String name, Element element, int energyCost, SkillType type, TargetType targetType) {
+    protected Skill(String name, Element element, int energyCost, boolean ifEnergyCost,SkillType type, TargetType targetType) {
         this.name = name;
         this.element = element;
         this.energyCost = energyCost;
         this.type = type;
         this.targetType = targetType;
+        this.ifEnergyCost = ifEnergyCost;
     }
 
     // 抽象方法：子类或策略类实现具体效果
@@ -39,18 +42,23 @@ public abstract class Skill {
         private SkillType type;
         private SkillEffect effect;
         private TargetType targetType;
+        private boolean ifEnergyCost;
 
         public SkillBuilder setName(String name) { this.name = name; return this; }
         public SkillBuilder setElement(Element element) { this.element = element; return this; }
-        public SkillBuilder setEnergyCost(int cost) { this.energyCost = cost; return this; }
+        public SkillBuilder setEnergyCost(int cost, boolean ifCost) { this.energyCost = cost;this.ifEnergyCost = ifCost; return this; }
+        //public SkillBuilder setIfEnergyCost(boolean ifCost) {this.ifEnergyCost = ifCost; return this; }
         public SkillBuilder setType(SkillType type) { this.type = type; return this; }
         public SkillBuilder setEffect(SkillEffect effect) { this.effect = effect; return this; }
         public SkillBuilder setTargetType(TargetType target) { this.targetType = target; return this; }
 
         public Skill build() {
-            return new Skill(name, element, energyCost, type, targetType) {
+            return new Skill(name, element, energyCost, ifEnergyCost, type, targetType) {
                 @Override
                 public void applyEffect(Pet caster, Pet target) {
+                    if(ifEnergyCost) {
+                        caster.removeEnergy(BattleSystem.getEnergyCost(energyCost,caster));
+                    }
                     effect.apply(caster, target);
                 }
             };

@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="新增Skill方法，继续完善Pet类">
+      <change afterPath="$PROJECT_DIR$/src/com/main/classes/Wallet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/game/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/main.java" afterDir="false" />
@@ -91,6 +92,9 @@
       <workItem from="1742882670882" duration="17156000" />
       <workItem from="1742917558513" duration="39000" />
       <workItem from="1742979981306" duration="2950000" />
+      <workItem from="1743039685570" duration="600000" />
+      <workItem from="1743415763378" duration="4800000" />
+      <workItem from="1743500779810" duration="4431000" />
     </task>
     <task id="LOCAL-00001" summary="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
       <option name="closed" value="true" />

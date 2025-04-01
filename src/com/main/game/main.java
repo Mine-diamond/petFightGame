@@ -28,5 +28,9 @@ public class main {
         pet2.addSkills(SkillLibrary.skillFireBall);
 
         System.out.println(pet1.getAllSkills());
+
+        pet1.getSkillsArray()[0].applyEffect(pet1,pet2);
+        System.out.println(pet2);
+        System.out.println(pet1);
     }
 }
