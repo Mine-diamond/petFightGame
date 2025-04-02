@@ -8,4 +8,17 @@ public class Player {
     String name;
 
     public ArrayList<Pet> pets = new ArrayList<>();
+    public Wallet wallet;
+
+    public Player() {
+        wallet = new Wallet();
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

@@ -6,7 +6,17 @@ import java.util.Map;
 public class Wallet {
 
     public enum CurrencyType {
-        Coin,Diamond
+        Coin("硬币"),Diamond("钻石");
+
+
+        private final String NAME;
+        CurrencyType(String NAME) {
+            this.NAME = NAME;
+        }
+
+        public String getName() { // 添加getter方法
+            return NAME;
+        }
     }
 
     Map<CurrencyType,Integer> currencies = new EnumMap<>(CurrencyType.class);
@@ -51,6 +61,15 @@ public class Wallet {
 
     public boolean hasSufficientAmount(CurrencyType type, int amount) {//是否有足够多的货币
         return currencies.get(type) >= amount;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("货币:").append(System.lineSeparator());
+        for (CurrencyType type : currencies.keySet()) {
+            sb.append(type.NAME).append(":").append(currencies.get(type)).append(System.lineSeparator());
+        }
+        return sb.toString();
     }
 
 }

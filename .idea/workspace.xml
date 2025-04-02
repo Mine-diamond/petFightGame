@@ -4,14 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="新增Skill方法，继续完善Pet类">
-      <change afterPath="$PROJECT_DIR$/src/com/main/classes/Wallet.java" afterDir="false" />
+    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="增加了Wallet类">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/Wallet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/Wallet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/game/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/pets/Pet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/Pet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/skills/Skill.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/Skill.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/skills/SkillLibrary.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/SkillLibrary.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +91,8 @@
       <workItem from="1742979981306" duration="2950000" />
       <workItem from="1743039685570" duration="600000" />
       <workItem from="1743415763378" duration="4800000" />
-      <workItem from="1743500779810" duration="4431000" />
+      <workItem from="1743500779810" duration="6746000" />
+      <workItem from="1743588695769" duration="596000" />
     </task>
     <task id="LOCAL-00001" summary="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
       <option name="closed" value="true" />
@@ -120,7 +118,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742910273838</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="增加了Wallet类">
+      <option name="closed" value="true" />
+      <created>1743512665636</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1743512665636</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -153,7 +159,8 @@
     <MESSAGE value="first commit，添加了Pet类与FireFox子类，但是还没有做完。" />
     <MESSAGE value="完善Pet类，实现一些基本方法" />
     <MESSAGE value="新增Skill方法，继续完善Pet类" />
-    <option name="LAST_COMMIT_MESSAGE" value="新增Skill方法，继续完善Pet类" />
+    <MESSAGE value="增加了Wallet类" />
+    <option name="LAST_COMMIT_MESSAGE" value="增加了Wallet类" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

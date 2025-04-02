@@ -8,7 +8,6 @@ import com.main.pets.FireFox;
 import com.main.pets.Pet;
 import com.main.skills.SkillLibrary;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Scanner;
 
@@ -32,5 +31,13 @@ public class main {
         pet1.getSkillsArray()[0].applyEffect(pet1,pet2);
         System.out.println(pet2);
         System.out.println(pet1);
+
+        player.setName("DiamondMine");
+
+        player.wallet.addCurrency(Wallet.CurrencyType.Coin,100);
+        player.wallet.addCurrency(Wallet.CurrencyType.Diamond,20);
+
+        System.out.println(player.getName());
+        System.out.println(player.wallet);
     }
 }
