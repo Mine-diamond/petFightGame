@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="增加了Wallet类">
+    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="优化wallet类">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/classes/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/classes/Wallet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/Wallet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/game/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/pets/Pet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/Pet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/skills/Skill.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/Skill.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,7 +93,8 @@
       <workItem from="1743039685570" duration="600000" />
       <workItem from="1743415763378" duration="4800000" />
       <workItem from="1743500779810" duration="6746000" />
-      <workItem from="1743588695769" duration="596000" />
+      <workItem from="1743588695769" duration="7423000" />
+      <workItem from="1743670463177" duration="2421000" />
     </task>
     <task id="LOCAL-00001" summary="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
       <option name="closed" value="true" />
@@ -126,7 +128,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743512665636</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="优化wallet类">
+      <option name="closed" value="true" />
+      <created>1743601966282</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1743601966282</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -160,7 +170,8 @@
     <MESSAGE value="完善Pet类，实现一些基本方法" />
     <MESSAGE value="新增Skill方法，继续完善Pet类" />
     <MESSAGE value="增加了Wallet类" />
-    <option name="LAST_COMMIT_MESSAGE" value="增加了Wallet类" />
+    <MESSAGE value="优化wallet类" />
+    <option name="LAST_COMMIT_MESSAGE" value="优化wallet类" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

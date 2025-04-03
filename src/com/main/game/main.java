@@ -28,9 +28,7 @@ public class main {
 
         System.out.println(pet1.getAllSkills());
 
-        pet1.getSkillsArray()[0].applyEffect(pet1,pet2);
-        System.out.println(pet2);
-        System.out.println(pet1);
+
 
         player.setName("DiamondMine");
 
@@ -39,5 +37,9 @@ public class main {
 
         System.out.println(player.getName());
         System.out.println(player.wallet);
+
+        BattleSystem battleSystem = new BattleSystem(pet1, pet2,10);
+
+        battleSystem.battleFlow();
     }
 }

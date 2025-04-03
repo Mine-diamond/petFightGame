@@ -32,7 +32,7 @@ public abstract class Skill {
     }
 
     // 抽象方法：子类或策略类实现具体效果
-    public abstract void applyEffect(Pet caster, Pet target);
+    public abstract boolean applyEffect(Pet caster, Pet target);
 
     // 建造者类（用于快速配置基础技能）
     public static class SkillBuilder {
@@ -55,11 +55,17 @@ public abstract class Skill {
         public Skill build() {
             return new Skill(name, element, energyCost, ifEnergyCost, type, targetType) {
                 @Override
-                public void applyEffect(Pet caster, Pet target) {
+                public boolean applyEffect(Pet caster, Pet target) {
+
+                    if(!caster.canRemoveEnergy(energyCost)) {
+                        return false;
+                    }
+
                     if(ifEnergyCost) {
                         caster.removeEnergy(BattleSystem.getEnergyCost(energyCost,caster));
                     }
                     effect.apply(caster, target);
+                    return true;
                 }
             };
         }

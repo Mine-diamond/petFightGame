@@ -219,6 +219,18 @@ public abstract class Pet {
         }
     }
 
+    public boolean canRemoveHP(int hp) {
+        if(hp < 0) {
+            throw new IllegalArgumentException("hp must be a positive integer");
+        }
+
+        if (this.currentHP - hp >= 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     //------------------------能量相关方法--------------------------
     public int getMaxEnergy() {
         return maxEnergy;
@@ -267,6 +279,16 @@ public abstract class Pet {
         }
     }
 
+    public boolean canRemoveEnergy(int energy) {
+        if(energy < 0) {
+            throw new IllegalArgumentException("energy must be a positive integer");
+        }
+        if (this.currentEnergy - energy >= 0) {
+            return true;
+        }
+        return false;
+    }
+
     //------------------------攻击与防御相关方法--------------------------
     public int getBaseAttack() {
         return baseAttack;
@@ -301,8 +323,10 @@ public abstract class Pet {
      */
     public String getAllSkills() {
         StringBuilder skillsStr = new StringBuilder();
+        int i = 0;
         for (Skill skill : skills) {
-            skillsStr.append(skill.toString()).append("\n");
+            i++;
+            skillsStr.append(i).append(". ").append(skill.toString()).append("\n");
         }
         return skillsStr.toString();
     }
