@@ -12,6 +12,7 @@ public abstract class Skill {
     protected boolean ifEnergyCost;
     protected SkillType type;
     protected TargetType targetType;
+    protected String description;
 
     public enum SkillType { ATTACK, DEFENSE, HEAL, STATUS }
     public enum TargetType { SELF, ENEMY }
@@ -22,13 +23,14 @@ public abstract class Skill {
     }
 
     // 构造器（子类调用）
-    protected Skill(String name, Element element, int energyCost, boolean ifEnergyCost,SkillType type, TargetType targetType) {
+    protected Skill(String name, Element element, int energyCost, boolean ifEnergyCost,SkillType type, TargetType targetType, String description) {
         this.name = name;
         this.element = element;
         this.energyCost = energyCost;
         this.type = type;
         this.targetType = targetType;
         this.ifEnergyCost = ifEnergyCost;
+        this.description = description;
     }
 
     // 抽象方法：子类或策略类实现具体效果
@@ -43,6 +45,7 @@ public abstract class Skill {
         private SkillEffect effect;
         private TargetType targetType;
         private boolean ifEnergyCost;
+        private String description;
 
         public SkillBuilder setName(String name) { this.name = name; return this; }
         public SkillBuilder setElement(Element element) { this.element = element; return this; }
@@ -51,9 +54,11 @@ public abstract class Skill {
         public SkillBuilder setType(SkillType type) { this.type = type; return this; }
         public SkillBuilder setEffect(SkillEffect effect) { this.effect = effect; return this; }
         public SkillBuilder setTargetType(TargetType target) { this.targetType = target; return this; }
+        public SkillBuilder setDescription(String description) { this.description = description; return this; }
+
 
         public Skill build() {
-            return new Skill(name, element, energyCost, ifEnergyCost, type, targetType) {
+            return new Skill(name, element, energyCost, ifEnergyCost, type, targetType, description) {
                 @Override
                 public boolean applyEffect(Pet caster, Pet target) {
 
@@ -73,7 +78,31 @@ public abstract class Skill {
 
 
     public String toString() {
-        return name + " " + element.toString() + " " + energyCost + " " + type.toString() + " " + targetType.toString();
+        StringBuilder str = new StringBuilder();
+        str.append("名称:").append(name)
+                .append(" 元素:").append(element.toString())
+                .append(" 消耗能量值:").append(energyCost)
+                .append(" 种类:").append(type.toString())
+                .append(" 对象目标:").append(targetType.toString())
+                .append(" 描述:").append(description);
+        return str.toString();
+    }
+
+    public static boolean isSameElement(Skill s1, Skill s2) {
+        return s1.element == s2.element;
+    }
+
+    public static boolean ifAbleAddSkill(Skill skill, Element[] elements) {
+        boolean result = false;
+        if(skill.element == Element.noElement) {
+            result = true;
+        }
+        for(Element element : elements) {
+            if(skill.element == element) {
+                result = true;
+            }
+        }
+        return result;
     }
 }
 

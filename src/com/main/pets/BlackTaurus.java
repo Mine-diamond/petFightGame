@@ -12,7 +12,7 @@ public class BlackTaurus extends Pet {
         super(level, attributes, skills);
         this.name = "黑金牛";
         this.type = "黑金牛";
-        this.elements = new Element[]{Element.fire}; // 明确元素属性
+        this.elements = new Element[]{Element.earth}; // 明确元素属性
         for (int i = 0;i < 50;i++){
             levelExpRequirements.put(i+1,50 + 30*i);
         }

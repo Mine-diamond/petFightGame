@@ -5,7 +5,8 @@ public enum Element {
     wood,
     earth,
     water,
-    fire;
+    fire,
+    noElement;
 
     private Element counteredElement;
 
@@ -16,9 +17,8 @@ public enum Element {
         earth.counteredElement = water;
         water.counteredElement = fire;
         fire.counteredElement = gold;
+        noElement.counteredElement = null;
     }
 
-    public boolean counters(Element other) {
-        return this.counteredElement == other;
-    }
+    public boolean counters(Element other) {return this.counteredElement == other;}
 }

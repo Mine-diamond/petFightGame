@@ -18,16 +18,21 @@ public class main {
         Player player = new Player();
         player.pets.add(new FireFox(2, Attributes.Offensive,new LinkedHashSet<>()));
         Pet pet1 = player.pets.get(0);
+        pet1.addSkills(SkillLibrary.skillNull);
         pet1.addSkills(SkillLibrary.skillFireBall);
         pet1.addSkills(SkillLibrary.skillFireBall);
         pet1.addSkills(SkillLibrary.skillEarthShattering);
+        pet1.addSkills(SkillLibrary.skillRecover);
+        pet1.addSkills(SkillLibrary.skillRecover);
 
         player.pets.add(new BlackTaurus(2, Attributes.Defensive,new LinkedHashSet<>()));
         Pet pet2 = player.pets.get(1);
+        pet2.addSkills(SkillLibrary.skillNull);
+        pet2.addSkills(SkillLibrary.skillEarthShattering);
         pet2.addSkills(SkillLibrary.skillFireBall);
+        pet2.addSkills(SkillLibrary.skillRecover);
 
         System.out.println(pet1.getAllSkills());
-
 
 
         player.setName("DiamondMine");
