@@ -4,18 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="初步实现了BattleSystem类，但是现在还很粗糙">
-      <change afterPath="$PROJECT_DIR$/src/com/main/classes/ValueModifier.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/test/ValueModifierTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/test/test.java" afterDir="false" />
+    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="添加了ValueModifier，重构了Pet类的数据管理">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/classes/Element.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/Element.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/game/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/pets/BlackTaurus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/BlackTaurus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/ValueModifier.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/ValueModifier.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/pets/Pet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/Pet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/skills/Skill.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/Skill.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/skills/SkillLibrary.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/SkillLibrary.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,6 +55,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Application.ValueModifier.executor&quot;: &quot;Run&quot;,
     &quot;Application.ValueModifierTest.executor&quot;: &quot;Run&quot;,
     &quot;Application.main.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
@@ -103,7 +96,9 @@
       <workItem from="1743588695769" duration="7423000" />
       <workItem from="1743670463177" duration="9261000" />
       <workItem from="1743738283101" duration="8883000" />
-      <workItem from="1743820355372" duration="4260000" />
+      <workItem from="1743820355372" duration="11677000" />
+      <workItem from="1743932023993" duration="4472000" />
+      <workItem from="1744197547019" duration="3818000" />
     </task>
     <task id="LOCAL-00001" summary="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
       <option name="closed" value="true" />
@@ -153,7 +148,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743676262183</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="添加了ValueModifier，重构了Pet类的数据管理">
+      <option name="closed" value="true" />
+      <created>1743826274242</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1743826274242</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -189,7 +192,8 @@
     <MESSAGE value="增加了Wallet类" />
     <MESSAGE value="优化wallet类" />
     <MESSAGE value="初步实现了BattleSystem类，但是现在还很粗糙" />
-    <option name="LAST_COMMIT_MESSAGE" value="初步实现了BattleSystem类，但是现在还很粗糙" />
+    <MESSAGE value="添加了ValueModifier，重构了Pet类的数据管理" />
+    <option name="LAST_COMMIT_MESSAGE" value="添加了ValueModifier，重构了Pet类的数据管理" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

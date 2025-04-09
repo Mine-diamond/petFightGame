@@ -1,883 +1,1139 @@
 package com.main.classes;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.time.LocalDateTime;
+import java.lang.ref.WeakReference;
 
 /**
- * ValueModifier - 一个灵活、强大的值修改系统
- * 明确分离基值和修改值的职责，支持修改器优先级和多种修改类型。
+ * ValueModifier 类用于管理游戏中的数值属性，支持永久修改和临时修改
  */
 public class ValueModifier {
+    // 优先级常量
+    public static final int PRIORITY_HIGHEST = 100;
+    public static final int PRIORITY_HIGH = 200;
+    public static final int PRIORITY_NORMAL = 500; // 默认值
+    public static final int PRIORITY_LOW = 800;
+    public static final int PRIORITY_LOWEST = 1000;
+
+    // 核心数据
+    private final double initialBaseValue;
+    private double currentBaseValue;
+    private final List<PermanentModification> modificationHistory = new ArrayList<>();
+
+    // 按类型分组存储修改器
+    private final Map<ModifierType, Map<String, TemporaryModifier>> modifiersByType = new EnumMap<>(ModifierType.class);
+
+    // 用于自动更新的ModifiedValue集合
+    private final Set<WeakReference<ModifiedValue>> modifiedValues = new HashSet<>();
 
     /**
-     * 修改器类型枚举
+     * 创建一个新的ValueModifier实例
+     * @param initialValue 初始基础值
+     */
+    public ValueModifier(double initialValue) {
+        this.initialBaseValue = initialValue;
+        this.currentBaseValue = initialValue;
+
+        // 初始化所有修改器类型的映射
+        for (ModifierType type : ModifierType.values()) {
+            modifiersByType.put(type, new HashMap<>());
+        }
+    }
+
+    /**
+     * 创建一个新的ValueModifier实例
+     * @param initialValue 初始基础值
+     */
+    public ValueModifier(int initialValue) {
+        this((double) initialValue);
+    }
+
+    // ==================== 基础值管理 ====================
+
+    /**
+     * 获取初始基础值
+     * @return 初始基础值
+     */
+    public double getInitialBaseValue() {
+        return initialBaseValue;
+    }
+
+    /**
+     * 获取当前基础值
+     * @return 当前基础值
+     */
+    public double getCurrentBaseValue() {
+        return currentBaseValue;
+    }
+
+    /**
+     * 修改基础值
+     * @param delta 变化量
+     * @param reason 修改原因
+     * @return 修改后的基础值
+     */
+    public double modifyBaseValue(double delta, String reason) {
+        double oldValue = currentBaseValue;
+        currentBaseValue += delta;
+        modificationHistory.add(new PermanentModification(oldValue, currentBaseValue, reason));
+        notifyModifiedValues();
+        return currentBaseValue;
+    }
+
+    /**
+     * 设置基础值
+     * @param newValue 新的基础值
+     * @param reason 修改原因
+     * @return 修改后的基础值
+     */
+    public double setBaseValue(double newValue, String reason) {
+        double oldValue = currentBaseValue;
+        currentBaseValue = newValue;
+        modificationHistory.add(new PermanentModification(oldValue, currentBaseValue, reason));
+        notifyModifiedValues();
+        return currentBaseValue;
+    }
+
+    // ==================== 永久修改历史管理 ====================
+
+    /**
+     * 获取修改历史
+     * @return 修改历史列表
+     */
+    public List<PermanentModification> getModificationHistory() {
+        return Collections.unmodifiableList(modificationHistory);
+    }
+
+    /**
+     * 撤销最后一次修改
+     * @return 撤销后的基础值，如果没有历史记录则返回当前值
+     */
+    public double undoLastModification() {
+        if (modificationHistory.isEmpty()) {
+            return currentBaseValue;
+        }
+
+        PermanentModification lastMod = modificationHistory.remove(modificationHistory.size() - 1);
+        currentBaseValue = lastMod.getOldValue();
+        notifyModifiedValues();
+        return currentBaseValue;
+    }
+
+    /**
+     * 撤销到特定历史点
+     * @param index 历史索引
+     * @return 撤销后的基础值
+     * @throws IndexOutOfBoundsException 如果索引无效
+     */
+    public double undoToHistoryPoint(int index) {
+        if (index < 0 || index >= modificationHistory.size()) {
+            throw new IndexOutOfBoundsException("Invalid history index: " + index);
+        }
+
+        PermanentModification targetMod = modificationHistory.get(index);
+        currentBaseValue = targetMod.getOldValue();
+
+        // 移除该索引及之后的所有历史
+        modificationHistory.subList(index, modificationHistory.size()).clear();
+
+        notifyModifiedValues();
+        return currentBaseValue;
+    }
+
+    /**
+     * 清除所有历史
+     */
+    public void clearHistory() {
+        modificationHistory.clear();
+    }
+
+    // ==================== 临时修改器管理 ====================
+
+    /**
+     * 添加临时加法修改器
+     * @param id 修改器ID
+     * @param value 修改值
+     * @param tag 标签
+     * @return 添加的修改器
+     */
+    public TemporaryModifier addAdditiveModifier(String id, double value, String tag) {
+        return addAdditiveModifier(id, value, tag, PRIORITY_NORMAL);
+    }
+
+    /**
+     * 添加临时加法修改器（带优先级）
+     * @param id 修改器ID
+     * @param value 修改值
+     * @param tag 标签
+     * @param priority 优先级（数字越小优先级越高）
+     * @return 添加的修改器
+     */
+    public TemporaryModifier addAdditiveModifier(String id, double value, String tag, int priority) {
+        return addModifier(id, ModifierType.ADDITIVE, value, tag, priority);
+    }
+
+    /**
+     * 添加临时乘法修改器
+     * @param id 修改器ID
+     * @param value 修改值（百分比，如0.2表示增加20%）
+     * @param tag 标签
+     * @return 添加的修改器
+     */
+    public TemporaryModifier addMultiplicativeModifier(String id, double value, String tag) {
+        return addMultiplicativeModifier(id, value, tag, PRIORITY_NORMAL);
+    }
+
+    /**
+     * 添加临时乘法修改器（带优先级）
+     * @param id 修改器ID
+     * @param value 修改值（百分比，如0.2表示增加20%）
+     * @param tag 标签
+     * @param priority 优先级（数字越小优先级越高）
+     * @return 添加的修改器
+     */
+    public TemporaryModifier addMultiplicativeModifier(String id, double value, String tag, int priority) {
+        return addModifier(id, ModifierType.MULTIPLICATIVE, value, tag, priority);
+    }
+
+    /**
+     * 添加基础值乘法修改器
+     * @param id 修改器ID
+     * @param value 修改值（百分比，如0.2表示增加20%基础值）
+     * @param tag 标签
+     * @return 添加的修改器
+     */
+    public TemporaryModifier addBaseMultiplicativeModifier(String id, double value, String tag) {
+        return addBaseMultiplicativeModifier(id, value, tag, PRIORITY_NORMAL);
+    }
+
+    /**
+     * 添加基础值乘法修改器（带优先级）
+     * @param id 修改器ID
+     * @param value 修改值（百分比，如0.2表示增加20%基础值）
+     * @param tag 标签
+     * @param priority 优先级（数字越小优先级越高）
+     * @return 添加的修改器
+     */
+    public TemporaryModifier addBaseMultiplicativeModifier(String id, double value, String tag, int priority) {
+        return addModifier(id, ModifierType.BASE_MULTIPLICATIVE, value, tag, priority);
+    }
+
+    /**
+     * 添加最小值限制修改器
+     * @param id 修改器ID
+     * @param minValue 最小值
+     * @param tag 标签
+     * @return 添加的修改器
+     */
+    public TemporaryModifier addMinLimitModifier(String id, double minValue, String tag) {
+        return addMinLimitModifier(id, minValue, tag, PRIORITY_NORMAL);
+    }
+
+    /**
+     * 添加最小值限制修改器（带优先级）
+     * @param id 修改器ID
+     * @param minValue 最小值
+     * @param tag 标签
+     * @param priority 优先级（数字越小优先级越高）
+     * @return 添加的修改器
+     */
+    public TemporaryModifier addMinLimitModifier(String id, double minValue, String tag, int priority) {
+        return addModifier(id, ModifierType.MIN_LIMIT, minValue, tag, priority);
+    }
+
+    /**
+     * 添加最大值限制修改器
+     * @param id 修改器ID
+     * @param maxValue 最大值
+     * @param tag 标签
+     * @return 添加的修改器
+     */
+    public TemporaryModifier addMaxLimitModifier(String id, double maxValue, String tag) {
+        return addMaxLimitModifier(id, maxValue, tag, PRIORITY_NORMAL);
+    }
+
+    /**
+     * 添加最大值限制修改器（带优先级）
+     * @param id 修改器ID
+     * @param maxValue 最大值
+     * @param tag 标签
+     * @param priority 优先级（数字越小优先级越高）
+     * @return 添加的修改器
+     */
+    public TemporaryModifier addMaxLimitModifier(String id, double maxValue, String tag, int priority) {
+        return addModifier(id, ModifierType.MAX_LIMIT, maxValue, tag, priority);
+    }
+
+    /**
+     * 添加任意类型的修改器
+     * @param id 修改器ID
+     * @param type 修改器类型
+     * @param value 修改值
+     * @param tag 标签
+     * @param priority 优先级
+     * @return 添加的修改器
+     */
+    private TemporaryModifier addModifier(String id, ModifierType type, double value, String tag, int priority) {
+        TemporaryModifier modifier = new TemporaryModifier(id, type, value, tag, priority);
+        modifiersByType.get(type).put(id, modifier);
+        notifyModifiedValues();
+        return modifier;
+    }
+
+    /**
+     * 设置修改器的优先级
+     * @param id 修改器ID
+     * @param newPriority 新的优先级
+     * @return 是否成功设置
+     */
+    public boolean setModifierPriority(String id, int newPriority) {
+        for (Map<String, TemporaryModifier> modifiers : modifiersByType.values()) {
+            if (modifiers.containsKey(id)) {
+                TemporaryModifier modifier = modifiers.get(id);
+                modifier.setPriority(newPriority);
+                notifyModifiedValues();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 按ID移除修改器
+     * @param id 修改器ID
+     * @return 是否成功移除
+     */
+    public boolean removeModifier(String id) {
+        boolean removed = false;
+        for (Map<String, TemporaryModifier> modifiers : modifiersByType.values()) {
+            if (modifiers.remove(id) != null) {
+                removed = true;
+                break;
+            }
+        }
+
+        if (removed) {
+            notifyModifiedValues();
+        }
+        return removed;
+    }
+
+    /**
+     * 按标签移除修改器
+     * @param tag 标签
+     * @return 移除的修改器数量
+     */
+    public int removeModifiersByTag(String tag) {
+        int count = 0;
+        for (Map<String, TemporaryModifier> modifiers : modifiersByType.values()) {
+            List<String> toRemove = modifiers.values().stream()
+                    .filter(mod -> mod.getTag().equals(tag))
+                    .map(TemporaryModifier::getId)
+                    .collect(Collectors.toList());
+
+            for (String id : toRemove) {
+                modifiers.remove(id);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            notifyModifiedValues();
+        }
+
+        return count;
+    }
+
+    /**
+     * 按标签前缀移除修改器
+     * @param tagPrefix 标签前缀
+     * @return 移除的修改器数量
+     */
+    public int removeModifiersByTagPrefix(String tagPrefix) {
+        int count = 0;
+        for (Map<String, TemporaryModifier> modifiers : modifiersByType.values()) {
+            List<String> toRemove = modifiers.values().stream()
+                    .filter(mod -> mod.getTag().startsWith(tagPrefix))
+                    .map(TemporaryModifier::getId)
+                    .collect(Collectors.toList());
+
+            for (String id : toRemove) {
+                modifiers.remove(id);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            notifyModifiedValues();
+        }
+
+        return count;
+    }
+
+    /**
+     * 清除所有临时修改器
+     */
+    public void clearAllModifiers() {
+        boolean hadModifiers = modifiersByType.values().stream()
+                .anyMatch(map -> !map.isEmpty());
+
+        if (hadModifiers) {
+            for (Map<String, TemporaryModifier> modifiers : modifiersByType.values()) {
+                modifiers.clear();
+            }
+            notifyModifiedValues();
+        }
+    }
+
+    /**
+     * 获取所有临时修改器
+     * @return 所有修改器的集合
+     */
+    public Collection<TemporaryModifier> getAllModifiers() {
+        List<TemporaryModifier> allModifiers = new ArrayList<>();
+        for (Map<String, TemporaryModifier> modifiers : modifiersByType.values()) {
+            allModifiers.addAll(modifiers.values());
+        }
+        return allModifiers;
+    }
+
+    /**
+     * 获取特定类型的所有修改器，按优先级排序
+     * @param type 修改器类型
+     * @return 排序后的修改器列表
+     */
+    private List<TemporaryModifier> getSortedModifiers(ModifierType type) {
+        return modifiersByType.get(type).values().stream()
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority)
+                        .thenComparingLong(TemporaryModifier::getCreationTime))
+                .collect(Collectors.toList());
+    }
+
+    // ==================== 值计算功能 ====================
+
+    /**
+     * 获取最终值
+     * @return 应用所有修改器后的最终值
+     */
+    public double getFinalValue() {
+        return calculateValue(mod -> true);
+    }
+
+    /**
+     * 获取不含特定标签的值
+     * @param excludeTag 要排除的标签
+     * @return 排除特定标签后的值
+     */
+    public double getValueExcludingTag(String excludeTag) {
+        return calculateValue(mod -> !mod.getTag().equals(excludeTag));
+    }
+
+    /**
+     * 获取只含特定标签的值
+     * @param includeTag 要包含的标签
+     * @return 只包含特定标签的值
+     */
+    public double getValueForTag(String includeTag) {
+        return calculateValueWithBaseAndTag(includeTag);
+    }
+
+    /**
+     * 计算只包含特定标签的值
+     * @param includeTag 要包含的标签
+     * @return 计算结果
+     */
+    private double calculateValueWithBaseAndTag(String includeTag) {
+        // 基础值乘法修改器（只包含特定标签）
+        double baseMultSum = modifiersByType.get(ModifierType.BASE_MULTIPLICATIVE).values().stream()
+                .filter(mod -> mod.getTag().equals(includeTag))
+                .mapToDouble(TemporaryModifier::getValue)
+                .sum();
+
+        // 应用基础值乘法
+        double modifiedBase = currentBaseValue * (1 + baseMultSum);
+
+        // 加法修改器（只包含特定标签）
+        double additiveSum = modifiersByType.get(ModifierType.ADDITIVE).values().stream()
+                .filter(mod -> mod.getTag().equals(includeTag))
+                .mapToDouble(TemporaryModifier::getValue)
+                .sum();
+
+        // 乘法修改器（只包含特定标签）
+        double multSum = modifiersByType.get(ModifierType.MULTIPLICATIVE).values().stream()
+                .filter(mod -> mod.getTag().equals(includeTag))
+                .mapToDouble(TemporaryModifier::getValue)
+                .sum();
+
+        // 计算结果
+        double result = (modifiedBase + additiveSum) * (1 + multSum);
+
+        // 应用限制器（只包含特定标签）
+        result = applyLimitsWithTag(result, includeTag);
+
+        return result;
+    }
+
+    /**
+     * 应用特定标签的限制器
+     * @param value 要限制的值
+     * @param includeTag 要包含的标签
+     * @return 限制后的值
+     */
+    private double applyLimitsWithTag(double value, String includeTag) {
+        // 最小值限制（只包含特定标签）
+        Optional<Double> minLimit = modifiersByType.get(ModifierType.MIN_LIMIT).values().stream()
+                .filter(mod -> mod.getTag().equals(includeTag))
+                .map(TemporaryModifier::getValue)
+                .max(Double::compare);
+
+        if (minLimit.isPresent() && value < minLimit.get()) {
+            value = minLimit.get();
+        }
+
+        // 最大值限制（只包含特定标签）
+        Optional<Double> maxLimit = modifiersByType.get(ModifierType.MAX_LIMIT).values().stream()
+                .filter(mod -> mod.getTag().equals(includeTag))
+                .map(TemporaryModifier::getValue)
+                .min(Double::compare);
+
+        if (maxLimit.isPresent() && value > maxLimit.get()) {
+            value = maxLimit.get();
+        }
+
+        return value;
+    }
+
+    /**
+     * 根据自定义条件计算值
+     * @param filter 修改器过滤条件
+     * @return 计算后的值
+     */
+    public double calculateValue(Predicate<TemporaryModifier> filter) {
+        // 1. 应用基础值乘法修改器
+        double baseMultSum = modifiersByType.get(ModifierType.BASE_MULTIPLICATIVE).values().stream()
+                .filter(filter)
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority))
+                .mapToDouble(TemporaryModifier::getValue)
+                .sum();
+
+        // 确保基础值乘法总和不低于-1（避免负值或零值）
+        baseMultSum = Math.max(baseMultSum, -0.99);
+
+        // 应用基础值乘法
+        double modifiedBase = currentBaseValue * (1 + baseMultSum);
+
+        // 2. 应用加法修改器
+        double additiveSum = modifiersByType.get(ModifierType.ADDITIVE).values().stream()
+                .filter(filter)
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority))
+                .mapToDouble(TemporaryModifier::getValue)
+                .sum();
+
+        // 3. 应用普通乘法修改器
+        double multSum = modifiersByType.get(ModifierType.MULTIPLICATIVE).values().stream()
+                .filter(filter)
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority))
+                .mapToDouble(TemporaryModifier::getValue)
+                .sum();
+
+        // 确保乘法总和不低于-1（避免负值或零值）
+        multSum = Math.max(multSum, -0.99);
+
+        // 计算中间结果
+        double result = (modifiedBase + additiveSum) * (1 + multSum);
+
+        // 4. 应用最小值限制
+        List<TemporaryModifier> minLimits = modifiersByType.get(ModifierType.MIN_LIMIT).values().stream()
+                .filter(filter)
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority))
+                .collect(Collectors.toList());
+
+        if (!minLimits.isEmpty()) {
+            // 取所有最小值限制中的最大值（最严格的下限）
+            double minLimit = minLimits.stream()
+                    .mapToDouble(TemporaryModifier::getValue)
+                    .max()
+                    .orElse(Double.NEGATIVE_INFINITY);
+
+            if (result < minLimit) {
+                result = minLimit;
+            }
+        }
+
+        // 5. 应用最大值限制
+        List<TemporaryModifier> maxLimits = modifiersByType.get(ModifierType.MAX_LIMIT).values().stream()
+                .filter(filter)
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority))
+                .collect(Collectors.toList());
+
+        if (!maxLimits.isEmpty()) {
+            // 取所有最大值限制中的最小值（最严格的上限）
+            double maxLimit = maxLimits.stream()
+                    .mapToDouble(TemporaryModifier::getValue)
+                    .min()
+                    .orElse(Double.POSITIVE_INFINITY);
+
+            if (result > maxLimit) {
+                result = maxLimit;
+            }
+        }
+
+        // 6. 处理限制器冲突（如果最小值大于最大值）
+        if (!minLimits.isEmpty() && !maxLimits.isEmpty()) {
+            double minLimit = minLimits.stream()
+                    .mapToDouble(TemporaryModifier::getValue)
+                    .max()
+                    .orElse(Double.NEGATIVE_INFINITY);
+
+            double maxLimit = maxLimits.stream()
+                    .mapToDouble(TemporaryModifier::getValue)
+                    .min()
+                    .orElse(Double.POSITIVE_INFINITY);
+
+            if (minLimit > maxLimit) {
+                // 冲突解决策略：使用优先级更高的限制器
+                TemporaryModifier highestPriorityMin = minLimits.get(0);
+                TemporaryModifier highestPriorityMax = maxLimits.get(0);
+
+                if (highestPriorityMin.getPriority() <= highestPriorityMax.getPriority()) {
+                    // 最小值限制优先级更高
+                    result = minLimit;
+                } else {
+                    // 最大值限制优先级更高
+                    result = maxLimit;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 创建一个ModifiedValue对象，自动跟踪值的变化
+     * @return ModifiedValue对象
+     */
+    public ModifiedValue createModifiedValue() {
+        ModifiedValue value = new ModifiedValue(mod -> true);
+        modifiedValues.add(new WeakReference<>(value));
+        return value;
+    }
+
+    /**
+     * 创建一个包含特定标签的ModifiedValue对象
+     * @param includeTag 要包含的标签
+     * @return ModifiedValue对象
+     */
+    public ModifiedValue createModifiedValueForTag(String includeTag) {
+        ModifiedValue value = new ModifiedValue(mod -> mod.getTag().equals(includeTag));
+        modifiedValues.add(new WeakReference<>(value));
+        return value;
+    }
+
+    /**
+     * 创建一个排除特定标签的ModifiedValue对象
+     * @param excludeTag 要排除的标签
+     * @return ModifiedValue对象
+     */
+    public ModifiedValue createModifiedValueExcludingTag(String excludeTag) {
+        ModifiedValue value = new ModifiedValue(mod -> !mod.getTag().equals(excludeTag));
+        modifiedValues.add(new WeakReference<>(value));
+        return value;
+    }
+
+    /**
+     * 通知所有ModifiedValue对象更新
+     */
+    private void notifyModifiedValues() {
+        // 移除已被垃圾回收的引用
+        modifiedValues.removeIf(ref -> ref.get() == null);
+
+        // 通知所有ModifiedValue更新
+        for (WeakReference<ModifiedValue> ref : modifiedValues) {
+            ModifiedValue value = ref.get();
+            if (value != null) {
+                value.update();
+            }
+        }
+    }
+
+    // ==================== 内部类 ====================
+
+    /**
+     * 永久修改记录类
+     */
+    public static class PermanentModification {
+        private final double oldValue;
+        private final double newValue;
+        private final String reason;
+        private final LocalDateTime timestamp;
+
+        public PermanentModification(double oldValue, double newValue, String reason) {
+            this.oldValue = oldValue;
+            this.newValue = newValue;
+            this.reason = reason;
+            this.timestamp = LocalDateTime.now();
+        }
+
+        public double getOldValue() {
+            return oldValue;
+        }
+
+        public double getNewValue() {
+            return newValue;
+        }
+
+        public String getReason() {
+            return reason;
+        }
+
+        public LocalDateTime getTimestamp() {
+            return timestamp;
+        }
+
+        public double getDelta() {
+            return newValue - oldValue;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("修改: %s, 从 %.2f 到 %.2f (变化: %+.2f), 时间: %s",
+                    reason, oldValue, newValue, getDelta(), timestamp);
+        }
+    }
+
+    /**
+     * 临时修改器类型枚举
      */
     public enum ModifierType {
-        ADD,           // 加法修改器
-        MULTIPLY,      // 乘法修改器
-        BASE_MULTIPLY, // 只乘以基值的修改器 (特殊处理，优先级最低，基于原始值计算效果)
-        SET_MAX,       // 设置上限修改器
-        SET_MIN        // 设置下限修改器
+        ADDITIVE("加法"),
+        MULTIPLICATIVE("乘法"),
+        BASE_MULTIPLICATIVE("基础值乘法"),
+        MIN_LIMIT("最小值限制"),
+        MAX_LIMIT("最大值限制");
+
+        private final String description;
+
+        ModifierType(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
     }
 
-    // --- 默认优先级常量 ---
-    public static final int PRIORITY_BASE_MULTIPLY = -100; // 特殊处理，实际在最前计算效果
-    public static final int PRIORITY_ADD = 0;
-    public static final int PRIORITY_MULTIPLY = 10;
-    public static final int PRIORITY_SET_MIN_MAX = 100; // 通常限制类修改器优先级较高
-
     /**
-     * 基值类 - 存储原始值和修改器
-     * 注意: T 现在需要实现 Comparable 用于 SET_MAX/SET_MIN
+     * 临时修改器类
      */
-    public static class BaseValue<T extends Number & Comparable<T>> {
-        private final T originalValue;
-        // 使用 Map 存储所有修改器，方便按 ID 移除
-        private final Map<String, Modifier<T>> modifiers = new LinkedHashMap<>();
-        private T cachedResult; // 存储计算后的结果
-        private boolean autoUpdate = true; // 是否自动更新
-        private boolean dirty = true; // 标记是否需要重新计算
+    public static class TemporaryModifier {
+        private final String id;
+        private final ModifierType type;
+        private final double value;
+        private final String tag;
+        private int priority;
+        private final long creationTime;
+
+        public TemporaryModifier(String id, ModifierType type, double value, String tag, int priority) {
+            this.id = id;
+            this.type = type;
+            this.value = value;
+            this.tag = tag;
+            this.priority = priority;
+            this.creationTime = System.nanoTime();
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public ModifierType getType() {
+            return type;
+        }
+
+        public double getValue() {
+            return value;
+        }
+
+        public String getTag() {
+            return tag;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        public void setPriority(int priority) {
+            this.priority = priority;
+        }
+
+        public long getCreationTime() {
+            return creationTime;
+        }
 
         /**
-         * 创建一个基值
+         * 检查标签是否以指定前缀开头
+         * @param prefix 前缀
+         * @return 是否匹配
          */
-        public BaseValue(T originalValue) {
-            if (originalValue == null) {
-                throw new IllegalArgumentException("Original value cannot be null");
+        public boolean tagStartsWith(String prefix) {
+            return tag.startsWith(prefix);
+        }
+
+        /**
+         * 获取标签在特定层级的值
+         * @param level 层级（从0开始）
+         * @return 层级值，如果层级不存在则返回null
+         */
+        public String getTagLevel(int level) {
+            String[] parts = tag.split("\\.");
+            if (level >= 0 && level < parts.length) {
+                return parts[level];
             }
-            this.originalValue = originalValue;
-            this.cachedResult = originalValue;
+            return null;
         }
-
-        /**
-         * 获取原始值
-         */
-        public T getOriginalValue() {
-            return originalValue;
-        }
-
-        /**
-         * 创建一个关联的修改值对象
-         */
-        public ModifiedValue<T> createModifiedValue() {
-            // 不再需要维护 modifiedValues 列表
-            return new ModifiedValue<>(this);
-        }
-
-        /**
-         * 设置是否自动更新
-         */
-        public BaseValue<T> setAutoUpdate(boolean autoUpdate) {
-            this.autoUpdate = autoUpdate;
-            if (autoUpdate && dirty) {
-                updateCachedResult(); // 如果设为自动更新且当前是脏状态，立即更新
-            }
-            return this;
-        }
-
-        /**
-         * 添加修改器 - 对象版本
-         */
-        public BaseValue<T> addModifier(Modifier<T> modifier) {
-            if (modifier == null) {
-                throw new IllegalArgumentException("Modifier cannot be null");
-            }
-            modifiers.put(modifier.getId(), modifier);
-            setDirty();
-            return this;
-        }
-
-        // --- 重载 addModifier 方法以支持优先级和直接参数 ---
-
-        /**
-         * 添加修改器 - 指定 ID、值、类型和优先级
-         */
-        public BaseValue<T> addModifier(String id, T value, ModifierType type, int priority) {
-            switch (type) {
-                case ADD:
-                    return addModifier(new AddModifier<>(id, value, priority));
-                case MULTIPLY:
-                    return addModifier(new MultiplyModifier<>(id, value, priority));
-                case BASE_MULTIPLY:
-                    // BaseMultiply 的优先级是固定的，用于计算逻辑，传入的 priority 被忽略
-                    return addModifier(new BaseMultiplyModifier<>(id, value));
-                case SET_MAX:
-                    return addModifier(new SetMaxModifier<>(id, value, priority));
-                case SET_MIN:
-                    return addModifier(new SetMinModifier<>(id, value, priority));
-                default:
-                    throw new IllegalArgumentException("未知的修改器类型: " + type);
-            }
-        }
-
-        /**
-         * 添加修改器 - 指定 ID、值、类型（使用默认优先级）
-         */
-        public BaseValue<T> addModifier(String id, T value, ModifierType type) {
-            int defaultPriority;
-            switch (type) {
-                case ADD:         defaultPriority = PRIORITY_ADD; break;
-                case MULTIPLY:    defaultPriority = PRIORITY_MULTIPLY; break;
-                case SET_MAX:
-                case SET_MIN:     defaultPriority = PRIORITY_SET_MIN_MAX; break;
-                case BASE_MULTIPLY: // BaseMultiply 特殊处理
-                    return addModifier(new BaseMultiplyModifier<>(id, value));
-                default: throw new IllegalArgumentException("未知的修改器类型: " + type);
-            }
-            return addModifier(id, value, type, defaultPriority);
-        }
-
-        /**
-         * 添加修改器 - 自动生成 ID，指定值、类型和优先级
-         */
-        public BaseValue<T> addModifier(T value, ModifierType type, int priority) {
-            return addModifier(UUID.randomUUID().toString(), value, type, priority);
-        }
-
-        /**
-         * 添加修改器 - 自动生成 ID，指定值、类型（使用默认优先级）
-         */
-        public BaseValue<T> addModifier(T value, ModifierType type) {
-            return addModifier(UUID.randomUUID().toString(), value, type);
-        }
-
-
-        /**
-         * 移除修改器
-         */
-        public BaseValue<T> removeModifier(String modifierId) {
-            if (modifiers.remove(modifierId) != null) {
-                setDirty();
-            }
-            return this;
-        }
-
-        /**
-         * 获取所有修改器 (不可变映射)
-         */
-        public Map<String, Modifier<T>> getAllModifiers() {
-            return Collections.unmodifiableMap(modifiers);
-        }
-
-        /**
-         * 应用所有修改器，计算修改后的值
-         */
-        public T calculateModifiedValue() {
-            // 如果没有修改且不需要强制计算，直接返回缓存结果
-            if (!dirty) {
-                return cachedResult;
-            }
-
-            // 1. 分离 BASE_MULTIPLY 和其他修改器
-            List<BaseMultiplyModifier<T>> baseMultipliers = new ArrayList<>();
-            List<Modifier<T>> otherModifiers = new ArrayList<>();
-
-            for (Modifier<T> mod : modifiers.values()) {
-                if (mod.getType() == ModifierType.BASE_MULTIPLY) {
-                    baseMultipliers.add((BaseMultiplyModifier<T>) mod);
-                } else {
-                    otherModifiers.add(mod);
-                }
-            }
-
-            // 2. 计算基值乘法的总效果 (基于原始值)
-            //    这部分逻辑在所有其他优先级修改器之前计算其 *效果*
-            Number baseMultiplierEffect = calculateBaseMultiplierEffect(baseMultipliers);
-
-            // 3. 应用基值乘法效果得到初始计算值
-            Number currentValue = applyBaseMultiplierEffect(originalValue, baseMultiplierEffect);
-
-
-            // 4. 对其他修改器按优先级排序 (数值小的优先)
-            otherModifiers.sort(Comparator.comparingInt(Modifier::getPriority));
-
-            // 5. 按优先级顺序应用其他修改器
-            for (Modifier<T> modifier : otherModifiers) {
-                // BASE_MULTIPLY 不在这里应用，因为它已经被处理了
-                if (modifier.getType() != ModifierType.BASE_MULTIPLY) {
-                    currentValue = applyModifier(modifier, currentValue);
-                }
-            }
-
-            // 6. 更新缓存结果
-            // 需要确保 currentValue 是正确的 T 类型
-            cachedResult = castResult(currentValue, originalValue);
-            dirty = false;
-
-            return cachedResult;
-        }
-
-        /**
-         * 计算所有 BaseMultiplyModifier 的累加效果 (返回一个加数值)
-         */
-        private Number calculateBaseMultiplierEffect(List<BaseMultiplyModifier<T>> baseMultipliers) {
-            if (baseMultipliers.isEmpty()) {
-                // 根据原始值类型返回 0
-                if (originalValue instanceof Double || originalValue instanceof Float) return 0.0;
-                if (originalValue instanceof Long) return 0L;
-                return 0; // Default to Integer 0
-            }
-
-            // 使用 BigDecimal 进行中间计算以提高精度
-            java.math.BigDecimal totalBaseMultiplierEffect = java.math.BigDecimal.ZERO;
-            java.math.BigDecimal originalValueDecimal = new java.math.BigDecimal(originalValue.toString());
-
-            for (BaseMultiplyModifier<T> multiplier : baseMultipliers) {
-                java.math.BigDecimal factorDecimal = new java.math.BigDecimal(multiplier.getFactor().toString());
-                // effect = (factor - 1) * originalValue
-                java.math.BigDecimal effect = factorDecimal.subtract(java.math.BigDecimal.ONE).multiply(originalValueDecimal);
-                totalBaseMultiplierEffect = totalBaseMultiplierEffect.add(effect);
-            }
-
-            // 根据原始类型转换回 Number
-            if (originalValue instanceof Double) return totalBaseMultiplierEffect.doubleValue();
-            if (originalValue instanceof Float) return totalBaseMultiplierEffect.floatValue();
-            if (originalValue instanceof Long) return totalBaseMultiplierEffect.longValueExact(); // May throw ArithmeticException if lossy
-            if (originalValue instanceof Integer) return totalBaseMultiplierEffect.intValueExact(); // May throw ArithmeticException if lossy
-            // Fallback for other Number types might be needed or throw exception
-            // For now, assume Double for unknown precise types
-            return totalBaseMultiplierEffect.doubleValue();
-        }
-
-        /**
-         * 将 BaseMultiplier 的效果应用到原始值上
-         */
-        private Number applyBaseMultiplierEffect(T original, Number effect) {
-            // 使用 BigDecimal 进行加法
-            java.math.BigDecimal originalDecimal = new java.math.BigDecimal(original.toString());
-            java.math.BigDecimal effectDecimal = new java.math.BigDecimal(effect.toString());
-            java.math.BigDecimal resultDecimal = originalDecimal.add(effectDecimal);
-
-            // 转换回原始类型对应的 Number
-            if (originalValue instanceof Double) return resultDecimal.doubleValue();
-            if (originalValue instanceof Float) return resultDecimal.floatValue();
-            if (originalValue instanceof Long) return resultDecimal.longValueExact();
-            if (originalValue instanceof Integer) return resultDecimal.intValueExact();
-            // Fallback
-            return resultDecimal.doubleValue();
-        }
-
-
-        /**
-         * 应用单个常规修改器 (ADD, MULTIPLY, SET_MAX, SET_MIN)
-         */
-        @SuppressWarnings("unchecked")
-        private Number applyModifier(Modifier<T> modifier, Number currentNumberValue) {
-            T currentValue = castResult(currentNumberValue, originalValue); // Ensure current value is of type T for comparison/operations
-
-            switch (modifier.getType()) {
-                case ADD:
-                    AddModifier<T> addMod = (AddModifier<T>) modifier;
-                    // 使用 BigDecimal 保证精度
-                    return new java.math.BigDecimal(currentValue.toString())
-                            .add(new java.math.BigDecimal(addMod.getAmount().toString()));
-                case MULTIPLY:
-                    MultiplyModifier<T> mulMod = (MultiplyModifier<T>) modifier;
-                    // 使用 BigDecimal 保证精度
-                    return new java.math.BigDecimal(currentValue.toString())
-                            .multiply(new java.math.BigDecimal(mulMod.getFactor().toString()));
-                case SET_MAX:
-                    SetMaxModifier<T> maxMod = (SetMaxModifier<T>) modifier;
-                    T maxValue = maxMod.getMaxValue();
-                    // currentValue > maxValue ? maxValue : currentValue
-                    return currentValue.compareTo(maxValue) > 0 ? maxValue : currentValue;
-                case SET_MIN:
-                    SetMinModifier<T> minMod = (SetMinModifier<T>) modifier;
-                    T minValue = minMod.getMinValue();
-                    // currentValue < minValue ? minValue : currentValue
-                    return currentValue.compareTo(minValue) < 0 ? minValue : currentValue;
-                case BASE_MULTIPLY:
-                    // Base multiply effect is pre-calculated and applied, should not reach here in normal flow
-                    System.err.println("Warning: BASE_MULTIPLY modifier encountered during prioritized application phase. Ignored.");
-                    return currentValue; // No change
-                default:
-                    // Should not happen if enum is exhaustive
-                    return currentValue;
-            }
-        }
-
-        /**
-         * 尝试将计算结果 (可能是 BigDecimal 或其他 Number) 转换回原始类型 T。
-         * 这对于保持类型一致性很重要，但可能涉及精度损失或溢出。
-         */
-        @SuppressWarnings("unchecked")
-        private T castResult(Number result, T originalTypeIndicator) {
-            if (result instanceof java.math.BigDecimal) {
-                java.math.BigDecimal bdResult = (java.math.BigDecimal) result;
-                if (originalTypeIndicator instanceof Double) return (T) Double.valueOf(bdResult.doubleValue());
-                if (originalTypeIndicator instanceof Float) return (T) Float.valueOf(bdResult.floatValue());
-                if (originalTypeIndicator instanceof Long) {
-                    try { return (T) Long.valueOf(bdResult.longValueExact()); } catch (ArithmeticException e) { /* Handle overflow/lossy conversion */ return (T) Long.valueOf(bdResult.longValue()); } // Or throw?
-                }
-                if (originalTypeIndicator instanceof Integer) {
-                    try { return (T) Integer.valueOf(bdResult.intValueExact()); } catch (ArithmeticException e) { /* Handle overflow/lossy conversion */ return (T) Integer.valueOf(bdResult.intValue()); } // Or throw?
-                }
-                // Add more types if needed (e.g., Short, Byte)
-                // Fallback or throw exception for unsupported T
-                return (T) result; // Or throw?
-            } else if (result.getClass() == originalTypeIndicator.getClass()) {
-                // Already the correct type (e.g., from SET_MAX/MIN)
-                return (T) result;
-            } else {
-                // Handle cases where result is Double/Integer etc. but not BigDecimal
-                // This might happen if only SET_MAX/MIN modifiers were applied
-                if (originalTypeIndicator instanceof Double) return (T) Double.valueOf(result.doubleValue());
-                if (originalTypeIndicator instanceof Float) return (T) Float.valueOf(result.floatValue());
-                if (originalTypeIndicator instanceof Long) return (T) Long.valueOf(result.longValue());
-                if (originalTypeIndicator instanceof Integer) return (T) Integer.valueOf(result.intValue());
-                // Fallback
-                return (T) result; // Best effort, might be wrong type
-            }
-        }
-
-
-        /**
-         * 标记状态为 dirty 并根据 autoUpdate 更新缓存
-         */
-        private void setDirty() {
-            if (!dirty) {
-                dirty = true;
-                if (autoUpdate) {
-                    updateCachedResult();
-                }
-            }
-        }
-
-        /**
-         * 更新缓存的结果 (如果需要)
-         */
-        private void updateCachedResult() {
-            if (dirty) {
-                calculateModifiedValue();
-            }
-        }
-
-        /**
-         * 获取计算后的值 (最终值)
-         */
-        public T getModifiedValue() {
-            if (dirty && autoUpdate) {
-                updateCachedResult();
-            } else if (dirty && !autoUpdate) {
-                // 如果是 dirty 且非自动更新，需要手动计算才能获取最新值
-                return calculateModifiedValue();
-            }
-            return cachedResult;
-        }
-
-        /**
-         * 清除所有修改器
-         */
-        public void clearModifiers() {
-            if (!modifiers.isEmpty()) {
-                modifiers.clear();
-                setDirty();
-            }
-        }
-
-        // --- 易用性方法 ---
-
-        /**
-         * 获取计算后的 Double 值
-         */
-        public double getAsDouble() {
-            return getModifiedValue().doubleValue();
-        }
-
-        /**
-         * 获取计算后的 Integer 值
-         */
-        public int getAsInt() {
-            return getModifiedValue().intValue();
-        }
-
-        /**
-         * 获取计算后的 Long 值
-         */
-        public long getAsLong() {
-            return getModifiedValue().longValue();
-        }
-
-        /**
-         * 获取计算后的 Float 值
-         */
-        public float getAsFloat() {
-            return getModifiedValue().floatValue();
-        }
-
-        // --- 快捷方法添加修改器 (使用默认优先级) ---
-
-        /**
-         * 添加加法修改器 (默认优先级)
-         */
-        public BaseValue<T> add(T value) {
-            return addModifier(value, ModifierType.ADD);
-        }
-
-        /**
-         * 添加乘法修改器 (默认优先级)
-         */
-        public BaseValue<T> multiply(T value) {
-            return addModifier(value, ModifierType.MULTIPLY);
-        }
-
-        /**
-         * 添加基值乘法修改器
-         */
-        public BaseValue<T> baseMultiply(T value) {
-            return addModifier(value, ModifierType.BASE_MULTIPLY);
-        }
-
-        /**
-         * 添加设置上限修改器 (默认优先级)
-         */
-        public BaseValue<T> setMax(T maxValue) {
-            return addModifier(maxValue, ModifierType.SET_MAX);
-        }
-
-        /**
-         * 添加设置下限修改器 (默认优先级)
-         */
-        public BaseValue<T> setMin(T minValue) {
-            return addModifier(minValue, ModifierType.SET_MIN);
-        }
-
 
         @Override
         public String toString() {
-            // 在 toString 中调用 getModifiedValue 会触发计算（如果 dirty）
-            return String.format("BaseValue[original=%s, modified=%s, modifiers=%d]",
-                    originalValue, getModifiedValue(), modifiers.size());
+            String valueStr;
+            switch (type) {
+                case MULTIPLICATIVE:
+                case BASE_MULTIPLICATIVE:
+                    valueStr = String.format("%+.1f%%", value * 100);
+                    break;
+                case MIN_LIMIT:
+                    valueStr = String.format("最小值: %.2f", value);
+                    break;
+                case MAX_LIMIT:
+                    valueStr = String.format("最大值: %.2f", value);
+                    break;
+                default:
+                    valueStr = String.format("%+.2f", value);
+            }
+            return String.format("%s: %s (%s, %s, 优先级: %d)", id, valueStr, type.getDescription(), tag, priority);
         }
     }
 
     /**
-     * 修改值类 - 可直接用于计算的修改后值
-     * 关联的 BaseValue 的 T 需要实现 Comparable
+     * 修改后的值类，实现Number接口以便于与Java数值系统集成
      */
-    public static class ModifiedValue<T extends Number & Comparable<T>> extends Number implements Comparable<Number> {
-        private final BaseValue<T> baseValue;
+    public class ModifiedValue extends Number implements Comparable<Number> {
+        private static final long serialVersionUID = 1L;
+        private final Predicate<TemporaryModifier> filter;
+        private double cachedValue;
 
-        /**
-         * 创建一个修改值，关联到指定的基值
-         */
-        ModifiedValue(BaseValue<T> baseValue) {
-            if (baseValue == null) {
-                throw new IllegalArgumentException("BaseValue cannot be null");
-            }
-            this.baseValue = baseValue;
+        private ModifiedValue(Predicate<TemporaryModifier> filter) {
+            this.filter = filter;
+            update();
         }
 
         /**
-         * 获取关联的基值
+         * 更新缓存的值
          */
-        public BaseValue<T> getBaseValue() {
-            return baseValue;
+        void update() {
+            this.cachedValue = calculateValue(filter);
         }
 
         /**
-         * 获取修改后的值 (总是从 BaseValue 获取最新计算结果)
+         * 获取当前值
+         * @return 当前值
          */
-        public T getValue() {
-            return baseValue.getModifiedValue();
+        public double getValue() {
+            return cachedValue;
         }
 
         /**
-         * 获取原始值
+         * 获取基础值
+         * @return 基础值
          */
-        public T getOriginalValue() {
-            return baseValue.getOriginalValue();
+        public double getBaseValue() {
+            return currentBaseValue;
         }
 
-        // --- 继承自 Number 的方法 ---
-        @Override public int intValue() { return getValue().intValue(); }
-        @Override public long longValue() { return getValue().longValue(); }
-        @Override public float floatValue() { return getValue().floatValue(); }
-        @Override public double doubleValue() { return getValue().doubleValue(); }
+        /**
+         * 获取修改百分比
+         * @return 相对于基础值的变化百分比
+         */
+        public double getModificationPercentage() {
+            return (cachedValue / currentBaseValue) - 1.0;
+        }
 
-        // --- 实现 Comparable ---
+        /**
+         * 获取参与计算的修改器
+         * @return 修改器列表
+         */
+        public List<TemporaryModifier> getContributingModifiers() {
+            return getAllModifiers().stream()
+                    .filter(filter)
+                    .collect(Collectors.toList());
+        }
+
+        /**
+         * 获取特定类型的修改器
+         * @param type 修改器类型
+         * @return 指定类型的修改器列表
+         */
+        public List<TemporaryModifier> getModifiersByType(ModifierType type) {
+            return getContributingModifiers().stream()
+                    .filter(mod -> mod.getType() == type)
+                    .collect(Collectors.toList());
+        }
+
+        /**
+         * 分析值的组成部分
+         * @return 值分析结果
+         */
+        public ValueBreakdown getValueBreakdown() {
+            return new ValueBreakdown(this);
+        }
+
+        // Number接口实现
+        @Override
+        public int intValue() {
+            return (int) cachedValue;
+        }
+
+        @Override
+        public long longValue() {
+            return (long) cachedValue;
+        }
+
+        @Override
+        public float floatValue() {
+            return (float) cachedValue;
+        }
+
+        @Override
+        public double doubleValue() {
+            return cachedValue;
+        }
+
+        // Comparable接口实现
         @Override
         public int compareTo(Number other) {
-            // 使用 BigDecimal 进行比较以提高精度和避免类型问题
-            return new java.math.BigDecimal(this.toString())
-                    .compareTo(new java.math.BigDecimal(other.toString()));
-        }
-
-        // --- 创建新 ModifiedValue 的操作 (返回新实例，不修改原 BaseValue) ---
-        // 注意：这些操作创建的是全新的、独立的 BaseValue/ModifiedValue
-        // 它们的值是基于当前 ModifiedValue 的 *计算结果*，而不是原始 BaseValue
-        // 这可能符合预期，也可能不符合，取决于具体用例。
-
-        /**
-         * 创建一个新的 ModifiedValue，其值为当前值的函数结果。
-         * 注意：返回的 ModifiedValue 的 BaseValue 是新创建的。
-         * 需要确保 R 类型也满足约束。
-         */
-        @SuppressWarnings("unchecked")
-        public <R extends Number & Comparable<R>> ModifiedValue<R> map(Function<T, R> mapper) {
-            R newValue = mapper.apply(getValue());
-            return new ModifiedValue<>(new BaseValue<>(newValue)); // 创建新的 BaseValue
-        }
-
-        /**
-         * 创建一个新的 ModifiedValue，其值为当前值加上指定值。
-         * 返回的 ModifiedValue 基于新的 BaseValue。
-         */
-        public ModifiedValue<T> plus(Number value) {
-            java.math.BigDecimal result = new java.math.BigDecimal(this.toString())
-                    .add(new java.math.BigDecimal(value.toString()));
-            return new ModifiedValue<>(new BaseValue<>(castResult(result, getValue())));
-        }
-
-        /**
-         * 创建一个新的 ModifiedValue，其值为当前值减去指定值。
-         * 返回的 ModifiedValue 基于新的 BaseValue。
-         */
-        public ModifiedValue<T> minus(Number value) {
-            java.math.BigDecimal result = new java.math.BigDecimal(this.toString())
-                    .subtract(new java.math.BigDecimal(value.toString()));
-            return new ModifiedValue<>(new BaseValue<>(castResult(result, getValue())));
-        }
-
-        /**
-         * 创建一个新的 ModifiedValue，其值为当前值乘以指定值。
-         * 返回的 ModifiedValue 基于新的 BaseValue。
-         */
-        public ModifiedValue<T> times(Number value) {
-            java.math.BigDecimal result = new java.math.BigDecimal(this.toString())
-                    .multiply(new java.math.BigDecimal(value.toString()));
-            // 对于乘法，可能需要指定精度和舍入模式
-            // java.math.BigDecimal result = currentDecimal.multiply(new java.math.BigDecimal(value.toString()), java.math.MathContext.DECIMAL64);
-            return new ModifiedValue<>(new BaseValue<>(castResult(result, getValue())));
-        }
-
-        /**
-         * 创建一个新的 ModifiedValue，其值为当前值除以指定值。
-         * 返回的 ModifiedValue 基于新的 BaseValue。
-         * 注意：除法需要处理精度和除零错误。
-         */
-        public ModifiedValue<T> dividedBy(Number value) {
-            java.math.BigDecimal divisor = new java.math.BigDecimal(value.toString());
-            if (divisor.compareTo(java.math.BigDecimal.ZERO) == 0) {
-                throw new ArithmeticException("Division by zero");
-            }
-            // 可能需要指定 scale 和 RoundingMode
-            java.math.BigDecimal result = new java.math.BigDecimal(this.toString())
-                    .divide(divisor, java.math.MathContext.DECIMAL64); // 使用标准精度
-            return new ModifiedValue<>(new BaseValue<>(castResult(result, getValue())));
-        }
-
-        // --- 类型转换方法 (返回新的 ModifiedValue) ---
-
-        /**
-         * 转换为 Double 类型的 ModifiedValue (基于新 BaseValue)
-         */
-        public ModifiedValue<Double> asDouble() {
-            // 确保 Double 也实现了 Comparable (它确实实现了)
-            return new ModifiedValue<>(new BaseValue<>(getValue().doubleValue()));
-        }
-
-        /**
-         * 转换为 Integer 类型的 ModifiedValue (基于新 BaseValue)
-         */
-        public ModifiedValue<Integer> asInt() {
-            // 确保 Integer 也实现了 Comparable (它确实实现了)
-            return new ModifiedValue<>(new BaseValue<>(getValue().intValue()));
-        }
-
-
-        @Override
-        public String toString() {
-            return getValue().toString(); // 直接返回计算后的值字符串
+            return Double.compare(cachedValue, other.doubleValue());
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null) return false;
-            // 比较数值，使用 compareTo 保证精度和类型兼容性
             if (obj instanceof Number) {
-                // return Double.compare(this.doubleValue(), ((Number) obj).doubleValue()) == 0; // 可能有精度问题
-                return this.compareTo((Number) obj) == 0;
+                return Double.compare(cachedValue, ((Number) obj).doubleValue()) == 0;
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            // HashCode 基于计算后的值
-            // 注意：如果值是 Double/Float，其 hashCode 行为可能需要注意
-            return getValue().hashCode();
+            return Double.hashCode(cachedValue);
         }
-
-        // Helper method from BaseValue needed here too for casting in arithmetic operations
-        @SuppressWarnings("unchecked")
-        private T castResult(Number result, T originalTypeIndicator) {
-            return baseValue.castResult(result, originalTypeIndicator); // Delegate to BaseValue's caster
-        }
-    }
-
-    /**
-     * 修改器接口
-     */
-    public interface Modifier<T extends Number & Comparable<T>> {
-        String getId();
-        ModifierType getType();
-        int getPriority(); // 获取优先级
 
         @Override
-        String toString();
-    }
-
-    // --- 具体修改器实现 ---
-
-    /**
-     * 加法修改器
-     */
-    public static class AddModifier<T extends Number & Comparable<T>> implements Modifier<T> {
-        private final String id;
-        private final T amount;
-        private final int priority;
-
-        public AddModifier(String id, T amount, int priority) {
-            this.id = id;
-            this.amount = Objects.requireNonNull(amount, "Amount cannot be null");
-            this.priority = priority;
-        }
-
-        @Override public String getId() { return id; }
-        @Override public ModifierType getType() { return ModifierType.ADD; }
-        @Override public int getPriority() { return priority; }
-        public T getAmount() { return amount; }
-
-        @Override public String toString() {
-            return String.format("AddModifier[id=%s, amount=%s, priority=%d]", id, amount, priority);
+        public String toString() {
+            return Double.toString(cachedValue);
         }
     }
 
     /**
-     * 乘法修改器
+     * 值分析结果类，用于详细分析值的组成部分
      */
-    public static class MultiplyModifier<T extends Number & Comparable<T>> implements Modifier<T> {
-        private final String id;
-        private final T factor;
-        private final int priority;
+    public class ValueBreakdown {
+        private final double baseValue;
+        private final double baseMultiplierEffect;
+        private final double additiveEffect;
+        private final double multiplicativeEffect;
+        private final double limitEffect;
+        private final double finalValue;
 
-        public MultiplyModifier(String id, T factor, int priority) {
-            this.id = id;
-            this.factor = Objects.requireNonNull(factor, "Factor cannot be null");
-            this.priority = priority;
+        private ValueBreakdown(ModifiedValue value) {
+            // 基础值
+            this.baseValue = currentBaseValue;
+
+            // 基础值乘法效果
+            double baseMultSum = value.getModifiersByType(ModifierType.BASE_MULTIPLICATIVE).stream()
+                    .mapToDouble(TemporaryModifier::getValue)
+                    .sum();
+            this.baseMultiplierEffect = currentBaseValue * baseMultSum;
+
+            // 加法效果
+            this.additiveEffect = value.getModifiersByType(ModifierType.ADDITIVE).stream()
+                    .mapToDouble(TemporaryModifier::getValue)
+                    .sum();
+
+            // 乘法效果
+            double multSum = value.getModifiersByType(ModifierType.MULTIPLICATIVE).stream()
+                    .mapToDouble(TemporaryModifier::getValue)
+                    .sum();
+            double afterAdditive = currentBaseValue * (1 + baseMultSum) + additiveEffect;
+            this.multiplicativeEffect = afterAdditive * multSum;
+
+            // 计算不含限制的值
+            double unlimitedValue = afterAdditive * (1 + multSum);
+
+            // 最终值
+            this.finalValue = value.getValue();
+
+            // 限制效果
+            this.limitEffect = finalValue - unlimitedValue;
         }
 
-        @Override public String getId() { return id; }
-        @Override public ModifierType getType() { return ModifierType.MULTIPLY; }
-        @Override public int getPriority() { return priority; }
-        public T getFactor() { return factor; }
-
-        @Override public String toString() {
-            return String.format("MultiplyModifier[id=%s, factor=%s, priority=%d]", id, factor, priority);
-        }
-    }
-
-    /**
-     * 基值乘法修改器 - 只乘以原始基值
-     * 优先级固定且特殊，在计算流程中优先处理其效果。
-     */
-    public static class BaseMultiplyModifier<T extends Number & Comparable<T>> implements Modifier<T> {
-        private final String id;
-        private final T factor;
-
-        public BaseMultiplyModifier(String id, T factor) {
-            this.id = id;
-            this.factor = Objects.requireNonNull(factor, "Factor cannot be null");
+        public double getBaseValue() {
+            return baseValue;
         }
 
-        @Override public String getId() { return id; }
-        @Override public ModifierType getType() { return ModifierType.BASE_MULTIPLY; }
-        // 优先级固定，象征性返回一个低值，实际计算逻辑不同
-        @Override public int getPriority() { return PRIORITY_BASE_MULTIPLY; }
-        public T getFactor() { return factor; }
-
-        @Override public String toString() {
-            return String.format("BaseMultiplyModifier[id=%s, factor=%s]", id, factor);
-        }
-    }
-
-    /**
-     * 设置上限修改器
-     */
-    public static class SetMaxModifier<T extends Number & Comparable<T>> implements Modifier<T> {
-        private final String id;
-        private final T maxValue;
-        private final int priority;
-
-        public SetMaxModifier(String id, T maxValue, int priority) {
-            this.id = id;
-            this.maxValue = Objects.requireNonNull(maxValue, "Max value cannot be null");
-            this.priority = priority;
+        public double getBaseMultiplierEffect() {
+            return baseMultiplierEffect;
         }
 
-        @Override public String getId() { return id; }
-        @Override public ModifierType getType() { return ModifierType.SET_MAX; }
-        @Override public int getPriority() { return priority; }
-        public T getMaxValue() { return maxValue; }
-
-        @Override public String toString() {
-            return String.format("SetMaxModifier[id=%s, maxValue=%s, priority=%d]", id, maxValue, priority);
-        }
-    }
-
-    /**
-     * 设置下限修改器
-     */
-    public static class SetMinModifier<T extends Number & Comparable<T>> implements Modifier<T> {
-        private final String id;
-        private final T minValue;
-        private final int priority;
-
-        public SetMinModifier(String id, T minValue, int priority) {
-            this.id = id;
-            this.minValue = Objects.requireNonNull(minValue, "Min value cannot be null");
-            this.priority = priority;
+        public double getAdditiveEffect() {
+            return additiveEffect;
         }
 
-        @Override public String getId() { return id; }
-        @Override public ModifierType getType() { return ModifierType.SET_MIN; }
-        @Override public int getPriority() { return priority; }
-        public T getMinValue() { return minValue; }
+        public double getMultiplicativeEffect() {
+            return multiplicativeEffect;
+        }
 
-        @Override public String toString() {
-            return String.format("SetMinModifier[id=%s, minValue=%s, priority=%d]", id, minValue, priority);
+        public double getLimitEffect() {
+            return limitEffect;
+        }
+
+        public double getFinalValue() {
+            return finalValue;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("值分析:\n");
+            sb.append(String.format("基础值: %.2f\n", baseValue));
+
+            if (baseMultiplierEffect != 0) {
+                sb.append(String.format("基础值乘法效果: %+.2f\n", baseMultiplierEffect));
+            }
+
+            if (additiveEffect != 0) {
+                sb.append(String.format("加法效果: %+.2f\n", additiveEffect));
+            }
+
+            if (multiplicativeEffect != 0) {
+                sb.append(String.format("乘法效果: %+.2f\n", multiplicativeEffect));
+            }
+
+            if (limitEffect != 0) {
+                sb.append(String.format("限制效果: %+.2f\n", limitEffect));
+            }
+
+            sb.append(String.format("最终值: %.2f", finalValue));
+            return sb.toString();
         }
     }
 
-
-    // --- 工厂方法 (保持不变，但注意泛型约束变化) ---
-
-    /**
-     * 工厂方法 - 创建 Double 类型的基值
-     */
-    public static BaseValue<Double> createBaseDouble(double initialValue) {
-        return new BaseValue<>(initialValue);
-    }
-
-    /**
-     * 工厂方法 - 创建 Integer 类型的基值
-     */
-    public static BaseValue<Integer> createBaseInt(int initialValue) {
-        return new BaseValue<>(initialValue);
-    }
-
-    /**
-     * 工厂方法 - 创建 Long 类型的基值
-     */
-    public static BaseValue<Long> createBaseLong(long initialValue) {
-        return new BaseValue<>(initialValue);
-    }
-
-    /**
-     * 工厂方法 - 创建 Double 类型的修改值
-     */
-    public static ModifiedValue<Double> createModifiedDouble(double initialValue) {
-        return new BaseValue<>(initialValue).createModifiedValue();
-    }
-
-    /**
-     * 工厂方法 - 创建 Integer 类型的修改值
-     */
-    public static ModifiedValue<Integer> createModifiedInt(int initialValue) {
-        return new BaseValue<>(initialValue).createModifiedValue();
-    }
-
-    /**
-     * 工厂方法 - 创建 Long 类型的修改值
-     */
-    public static ModifiedValue<Long> createModifiedLong(long initialValue) {
-        return new BaseValue<>(initialValue).createModifiedValue();
-    }
-
-
-    /**
-     * 使用示例 (更新以展示新功能)
-     */
     public static void main(String[] args) {
-        System.out.println("--- Double 示例 ---");
-        BaseValue<Double> attackDamage = createBaseDouble(100.0);
-        ModifiedValue<Double> finalDamage = attackDamage.createModifiedValue();
+        // 创建一个攻击力属性，初始值为100
+        ValueModifier attack = new ValueModifier(100);
 
-        // 添加修改器，注意优先级
-        attackDamage.addModifier("base_boost", 1.5, ModifierType.BASE_MULTIPLY); // 效果: (1.5-1)*100 = +50
-        attackDamage.addModifier("flat_bonus", 20.0, ModifierType.ADD, PRIORITY_ADD); // 优先级 0
-        attackDamage.addModifier("percent_increase", 1.2, ModifierType.MULTIPLY, PRIORITY_MULTIPLY); // 优先级 10
-        attackDamage.addModifier("gear_cap", 200.0, ModifierType.SET_MAX, PRIORITY_SET_MIN_MAX); // 优先级 100
-        attackDamage.addModifier("curse_reduction", 0.8, ModifierType.MULTIPLY, 5); // 优先级 5 (介于 ADD 和 MULTIPLY 之间)
+        System.out.println("=== 基本功能演示 ===");
 
-        // 计算过程模拟:
-        // 1. 原始值: 100.0
-        // 2. BaseMultiply 效果: +50.0 => 初始计算值 150.0
-        // 3. 按优先级排序应用其他修改器:
-        //    - Prio 0: ADD +20.0 => 150.0 + 20.0 = 170.0
-        //    - Prio 5: MULTIPLY *0.8 => 170.0 * 0.8 = 136.0
-        //    - Prio 10: MULTIPLY *1.2 => 136.0 * 1.2 = 163.2
-        //    - Prio 100: SET_MAX 200.0 => min(163.2, 200.0) = 163.2
+        // 永久修改：升级增加20点攻击力
+        attack.modifyBaseValue(20, "升级");
+        System.out.println("升级后基础攻击力: " + attack.getCurrentBaseValue());
 
-        System.out.println("原始伤害: " + attackDamage.getOriginalValue()); // 100.0
-        System.out.println("所有修改器: ");
-        attackDamage.getAllModifiers().values().stream()
-                .sorted(Comparator.comparingInt(Modifier::getPriority))
-                .forEach(m -> System.out.println("  " + m));
-        System.out.println("最终伤害 (BaseValue): " + attackDamage.getModifiedValue()); // 预期: 163.2
-        System.out.println("最终伤害 (ModifiedValue): " + finalDamage); // 预期: 163.2
-        System.out.println("最终伤害 (int, BaseValue): " + attackDamage.getAsInt()); // 预期: 163
-        System.out.println("最终伤害 (double, ModifiedValue): " + finalDamage.doubleValue()); // 预期: 163.2
+        // 添加各类修改器
+        // 1. 基础值乘法修改器（直接对基础值生效）
+        attack.addBaseMultiplicativeModifier("talent", 0.2, "character.talent");  // +20%基础攻击力
 
-        // 添加一个 SetMin
-        attackDamage.addModifier("min_guarantee", 170.0, ModifierType.SET_MIN, PRIORITY_SET_MIN_MAX + 1); // Prio 101
-        // 计算过程模拟:
-        // ... 上一步结果 163.2
-        //    - Prio 101: SET_MIN 170.0 => max(163.2, 170.0) = 170.0
-        System.out.println("添加 Min Guarantee 后: " + finalDamage); // 预期: 170.0
+        // 2. 加法修改器
+        attack.addAdditiveModifier("weapon", 50, "equipment.weapon");  // 武器+50攻击
+        attack.addAdditiveModifier("ring", 15, "equipment.accessory");  // 戒指+15攻击
 
-        // 移除一个修改器
-        attackDamage.removeModifier("curse_reduction");
-        System.out.println("移除 Curse Reduction 后: " + finalDamage); // 预期会重新计算
-        // 计算过程模拟:
-        // 1. 原始值: 100.0
-        // 2. BaseMultiply 效果: +50.0 => 初始计算值 150.0
-        // 3. 按优先级排序应用其他修改器:
-        //    - Prio 0: ADD +20.0 => 150.0 + 20.0 = 170.0
-        //    - Prio 10: MULTIPLY *1.2 => 170.0 * 1.2 = 204.0
-        //    - Prio 100: SET_MAX 200.0 => min(204.0, 200.0) = 200.0
-        //    - Prio 101: SET_MIN 170.0 => max(200.0, 170.0) = 200.0
-        System.out.println("移除 Curse Reduction 后预期: 200.0, 实际: " + finalDamage); // 预期: 200.0
+        // 3. 乘法修改器
+        attack.addMultiplicativeModifier("buff", 0.3, "buff.strength");  // 力量增强+30%
 
-        System.out.println("\n--- Integer 示例 ---");
-        BaseValue<Integer> score = createBaseInt(1000);
-        ModifiedValue<Integer> finalScore = score.createModifiedValue();
+        // 4. 限制修改器
+        attack.addMinLimitModifier("minDamage", 150, "system.limit");  // 最小伤害不低于150
+        attack.addMaxLimitModifier("maxDamage", 300, "system.limit");  // 最大伤害不超过300
 
-        score.add(100); // Prio 0
-        score.multiply(2); // Prio 10
-        score.setMax(2500); // Prio 100
-        score.setMin(500); // Prio 100
-        score.addModifier("bonus", 50, ModifierType.ADD, -5); // Prio -5 (比默认 ADD 更早)
+        // 获取最终攻击力
+        System.out.println("最终攻击力: " + attack.getFinalValue());
 
-        // 计算模拟:
-        // 1. 原始值: 1000
-        // 2. BaseMultiply: 无
-        // 3. 排序应用:
-        //    - Prio -5: ADD +50 => 1000 + 50 = 1050
-        //    - Prio 0: ADD +100 => 1050 + 100 = 1150
-        //    - Prio 10: MULTIPLY *2 => 1150 * 2 = 2300
-        //    - Prio 100: SET_MAX 2500 => min(2300, 2500) = 2300
-        //    - Prio 100: SET_MIN 500 => max(2300, 500) = 2300 (注意: 同优先级的应用顺序取决于 LinkedHashMap 插入顺序或 sort 稳定性，但对于min/max通常结果一致)
-        System.out.println("最终分数: " + finalScore); // 预期: 2300
+        System.out.println("\n=== 优先级系统演示 ===");
 
-        // ModifiedValue 的运算 (创建新实例)
-        ModifiedValue<Integer> scorePlus1000 = finalScore.plus(1000);
-        System.out.println("Final Score: " + finalScore); // 仍然是 2300
-        System.out.println("Score + 1000: " + scorePlus1000); // 3300 (这是一个新的 ModifiedValue)
-        System.out.println("Original base value still intact: " + score.getModifiedValue()); // 2300
+        // 清除所有修改器
+        attack.clearAllModifiers();
+
+        // 添加不同优先级的乘法修改器
+        attack.addMultiplicativeModifier("buff1", 0.5, "buff", ValueModifier.PRIORITY_HIGH);  // 高优先级
+        attack.addMultiplicativeModifier("buff2", 0.3, "buff", ValueModifier.PRIORITY_LOW);   // 低优先级
+
+        System.out.println("带优先级的攻击力: " + attack.getFinalValue());
+
+        // 修改优先级
+        attack.setModifierPriority("buff2", ValueModifier.PRIORITY_HIGHEST);  // 设为最高优先级
+        System.out.println("修改优先级后攻击力: " + attack.getFinalValue());
+
+        System.out.println("\n=== 基础值乘法修改器演示 ===");
+
+        // 清除所有修改器
+        attack.clearAllModifiers();
+
+        // 添加基础值乘法修改器
+        attack.addBaseMultiplicativeModifier("talent", 0.2, "character.talent");  // +20%基础值
+
+        // 添加普通乘法修改器
+        attack.addMultiplicativeModifier("buff", 0.5, "buff");  // +50%总值
+
+        System.out.println("基础值: " + attack.getCurrentBaseValue());
+        System.out.println("最终值: " + attack.getFinalValue());
+
+        System.out.println("\n=== 限制修改器演示 ===");
+
+        // 清除所有修改器
+        attack.clearAllModifiers();
+
+        // 添加大量加成
+        attack.addBaseMultiplicativeModifier("talent", 0.5, "character.talent");
+        attack.addAdditiveModifier("weapon", 100, "equipment");
+        attack.addMultiplicativeModifier("buff", 1.0, "buff");  // +100%
+
+        System.out.println("无限制攻击力: " + attack.getFinalValue());
+
+        // 添加最大值限制
+        attack.addMaxLimitModifier("maxDamage", 250, "system.limit");
+        System.out.println("添加上限后攻击力: " + attack.getFinalValue());
+
+        // 添加最小值限制
+        attack.clearAllModifiers();
+        attack.addMinLimitModifier("minDamage", 200, "system.limit");
+        System.out.println("只有下限时攻击力: " + attack.getFinalValue());
+
+        System.out.println("\n=== 限制器冲突演示 ===");
+
+        // 清除所有修改器
+        attack.clearAllModifiers();
+
+        // 添加冲突的限制器
+        attack.addMinLimitModifier("minDamage", 250, "system.limit", ValueModifier.PRIORITY_LOW);
+        attack.addMaxLimitModifier("maxDamage", 200, "system.limit", ValueModifier.PRIORITY_HIGH);
+
+        System.out.println("冲突限制器(最大值优先): " + attack.getFinalValue());
+
+        // 修改优先级
+        attack.setModifierPriority("minDamage", ValueModifier.PRIORITY_HIGHEST);
+        System.out.println("冲突限制器(最小值优先): " + attack.getFinalValue());
+
+        System.out.println("\n=== 值分析演示 ===");
+
+        // 清除所有修改器
+        attack.clearAllModifiers();
+
+        // 添加各种修改器
+        attack.addBaseMultiplicativeModifier("talent", 0.2, "character.talent");
+        attack.addAdditiveModifier("weapon", 50, "equipment.weapon");
+        attack.addMultiplicativeModifier("buff", 0.3, "buff");
+        attack.addMaxLimitModifier("maxDamage", 250, "system.limit");
+
+        // 创建值对象并分析
+        ValueModifier.ModifiedValue attackValue = attack.createModifiedValue();
+        System.out.println(attackValue.getValueBreakdown());
     }
 }
