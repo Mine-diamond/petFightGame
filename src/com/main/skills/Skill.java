@@ -62,12 +62,12 @@ public abstract class Skill {
                 @Override
                 public boolean applyEffect(Pet caster, Pet target) {
 
-                    if(!caster.canRemoveEnergy(energyCost)) {
+                    if(!caster.getStat().getEnergy().canRemoveValue(energyCost)) {
                         return false;
                     }
 
                     if(ifEnergyCost) {
-                        caster.removeEnergy(BattleSystem.getEnergyCost(energyCost,caster));
+                        caster.getStat().getEnergy().removeValue(BattleSystem.getEnergyCost(energyCost,caster));
                     }
                     effect.apply(caster, target);
                     return true;

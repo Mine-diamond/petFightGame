@@ -4,10 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="添加了ValueModifier，重构了Pet类的数据管理">
+    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="完全重构ModifiedValue">
+      <change afterPath="$PROJECT_DIR$/src/com/main/classes/ObservableDouble.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/main/classes/PetStat.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/main/classes/ResourceValue.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/main/pets/Pet_old.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/classes/ValueModifier.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/ValueModifier.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/game/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/pets/Pet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/Pet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/skills/Skill.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/Skill.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,7 +105,13 @@
       <workItem from="1743738283101" duration="8883000" />
       <workItem from="1743820355372" duration="11677000" />
       <workItem from="1743932023993" duration="4472000" />
-      <workItem from="1744197547019" duration="3818000" />
+      <workItem from="1744197547019" duration="7029000" />
+      <workItem from="1744249728427" duration="609000" />
+      <workItem from="1744257187638" duration="11115000" />
+      <workItem from="1744347192756" duration="6213000" />
+      <workItem from="1744445197265" duration="616000" />
+      <workItem from="1744513312520" duration="4009000" />
+      <workItem from="1744629620181" duration="5497000" />
     </task>
     <task id="LOCAL-00001" summary="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
       <option name="closed" value="true" />
@@ -156,7 +169,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743826274242</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="完全重构ModifiedValue">
+      <option name="closed" value="true" />
+      <created>1744207035551</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1744207035551</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -193,7 +214,8 @@
     <MESSAGE value="优化wallet类" />
     <MESSAGE value="初步实现了BattleSystem类，但是现在还很粗糙" />
     <MESSAGE value="添加了ValueModifier，重构了Pet类的数据管理" />
-    <option name="LAST_COMMIT_MESSAGE" value="添加了ValueModifier，重构了Pet类的数据管理" />
+    <MESSAGE value="完全重构ModifiedValue" />
+    <option name="LAST_COMMIT_MESSAGE" value="完全重构ModifiedValue" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

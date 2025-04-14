@@ -11,7 +11,7 @@ import com.main.skills.SkillLibrary;
 import java.util.LinkedHashSet;
 import java.util.Scanner;
 
-public class main {
+public class main {//仅测试用
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 

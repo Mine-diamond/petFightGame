@@ -13,8 +13,8 @@ public class SkillLibrary {
             .setDescription("释放火球产生伤害")
             .setEffect(
                     (caster, target) -> {
-                        int damage = caster.getBaseAttack();
-                        target.removeHP(damage);
+                        double damage = caster.getStat().getCurrentAttack().getValue();
+                        target.getStat().getHP().removeValue(damage);
                         }
 
             ).build();
@@ -28,8 +28,8 @@ public class SkillLibrary {
             .setDescription("用力震地，产生伤害")
             .setEffect(
                     (caster, target) -> {
-                        int damage = caster.getBaseAttack();
-                        target.removeHP(damage);
+                        double damage = caster.getStat().getCurrentAttack().getValue();
+                        target.getStat().getHP().removeValue(damage);
                     }
 
             ).build();
@@ -57,8 +57,8 @@ public class SkillLibrary {
             .setDescription("恢复25%血量和50%能量")
             .setEffect(
                     (caster, target) -> {
-                        caster.addHP((int) (caster.getMaxHP() * 0.3));
-                        caster.addEnergy((int) (caster.getMaxEnergy() * 0.5));
+                        caster.getStat().getHP().addValue((int) (caster.getStat().getHP().getCurrentMaxValue() * 0.3));
+                        caster.getStat().getEnergy().addValue((int) (caster.getStat().getEnergy().getCurrentMaxValue() * 0.5));
                     }
 
             ).build();

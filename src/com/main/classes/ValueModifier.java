@@ -1,5 +1,6 @@
 package com.main.classes;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -28,6 +29,13 @@ public class ValueModifier {
     // 用于自动更新的ModifiedValue集合
     private final Set<WeakReference<ModifiedValue>> modifiedValues = new HashSet<>();
 
+    // 精度控制属性
+    private int calculationPrecision = -1;  // -1表示不限制精度
+    private int displayPrecision = -1;      // -1表示不限制精度
+    private boolean roundingForCalculation = true;  // true=四舍五入，false=直接截断
+    private boolean roundingForDisplay = false;     // true=四舍五入，false=直接截断
+    private String formatPattern = null;    // 自定义格式化模式
+
     /**
      * 创建一个新的ValueModifier实例
      * @param initialValue 初始基础值
@@ -48,6 +56,113 @@ public class ValueModifier {
      */
     public ValueModifier(int initialValue) {
         this((double) initialValue);
+    }
+
+    // ==================== 精度控制方法 ====================
+
+    /**
+     * 设置计算精度（小数位数）
+     * @param precision 小数位数，-1表示不限制精度
+     * @param useRounding 是否使用四舍五入（true）或直接截断（false）
+     */
+    public void setCalculationPrecision(int precision, boolean useRounding) {
+        this.calculationPrecision = precision;
+        this.roundingForCalculation = useRounding;
+        notifyModifiedValues();
+    }
+
+    /**
+     * 设置显示精度（小数位数）
+     * @param precision 小数位数，-1表示不限制精度
+     * @param useRounding 是否使用四舍五入（true）或直接截断（false）
+     */
+    public void setDisplayPrecision(int precision, boolean useRounding) {
+        this.displayPrecision = precision;
+        this.roundingForDisplay = useRounding;
+    }
+
+    /**
+     * 设置自定义格式化模式
+     * @param pattern 格式化模式，如"#.##"或"0.00%"
+     */
+    public void setFormatPattern(String pattern) {
+        if (pattern == null) {
+            this.formatPattern = null;
+            return;
+        }
+
+        try {
+            // 验证格式是否有效
+            new DecimalFormat(pattern).format(1.0);
+            this.formatPattern = pattern;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("无效的格式模式: " + pattern, e);
+        }
+    }
+
+    /**
+     * 应用计算精度
+     * @param value 原始值
+     * @return 应用精度后的值
+     */
+    private double applyCalculationPrecision(double value) {
+        if (calculationPrecision < 0) {
+            return value;  // 不限制精度
+        }
+
+        if (roundingForCalculation) {
+            // 四舍五入
+            double factor = Math.pow(10, calculationPrecision);
+            return Math.round(value * factor) / factor;
+        } else {
+            // 直接截断（对正负数都适用）
+            double factor = Math.pow(10, calculationPrecision);
+            return Math.signum(value) * Math.floor(Math.abs(value) * factor) / factor;
+        }
+    }
+
+    /**
+     * 应用显示精度并格式化
+     * @param value 原始值
+     * @return 格式化后的字符串
+     */
+    private String applyDisplayFormat(double value) {
+        // 先应用显示精度
+        double displayValue = value;
+        if (displayPrecision >= 0) {
+            if (roundingForDisplay) {
+                // 四舍五入
+                double factor = Math.pow(10, displayPrecision);
+                displayValue = Math.round(value * factor) / factor;
+            } else {
+                // 直接截断（对正负数都适用）
+                double factor = Math.pow(10, displayPrecision);
+                displayValue = Math.signum(value) * Math.floor(Math.abs(value) * factor) / factor;
+            }
+        }
+
+        // 然后应用格式化
+        if (formatPattern != null) {
+            try {
+                DecimalFormat df = new DecimalFormat(formatPattern);
+                return df.format(displayValue);
+            } catch (IllegalArgumentException e) {
+                // 格式无效，回退到默认格式
+                return Double.toString(displayValue);
+            }
+        } else if (displayPrecision >= 0) {
+            return String.format("%." + displayPrecision + "f", displayValue);
+        } else {
+            return Double.toString(displayValue);
+        }
+    }
+
+    /**
+     * 获取格式化的值
+     * @return 格式化后的字符串
+     */
+    public String getFormattedValue() {
+        return applyDisplayFormat(getFinalValue());
     }
 
     // ==================== 基础值管理 ====================
@@ -418,7 +533,8 @@ public class ValueModifier {
      * @return 应用所有修改器后的最终值
      */
     public double getFinalValue() {
-        return calculateValue(mod -> true);
+        double rawValue = calculateValue(mod -> true);
+        return applyCalculationPrecision(rawValue);
     }
 
     /**
@@ -427,7 +543,8 @@ public class ValueModifier {
      * @return 排除特定标签后的值
      */
     public double getValueExcludingTag(String excludeTag) {
-        return calculateValue(mod -> !mod.getTag().equals(excludeTag));
+        double rawValue = calculateValue(mod -> !mod.getTag().equals(excludeTag));
+        return applyCalculationPrecision(rawValue);
     }
 
     /**
@@ -436,7 +553,8 @@ public class ValueModifier {
      * @return 只包含特定标签的值
      */
     public double getValueForTag(String includeTag) {
-        return calculateValueWithBaseAndTag(includeTag);
+        double rawValue = calculateValueWithBaseAndTag(includeTag);
+        return applyCalculationPrecision(rawValue);
     }
 
     /**
@@ -448,8 +566,12 @@ public class ValueModifier {
         // 基础值乘法修改器（只包含特定标签）
         double baseMultSum = modifiersByType.get(ModifierType.BASE_MULTIPLICATIVE).values().stream()
                 .filter(mod -> mod.getTag().equals(includeTag))
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority))
                 .mapToDouble(TemporaryModifier::getValue)
                 .sum();
+
+        // 确保基础值乘法总和不低于-1（避免负值或零值）
+        baseMultSum = Math.max(baseMultSum, -0.99);
 
         // 应用基础值乘法
         double modifiedBase = currentBaseValue * (1 + baseMultSum);
@@ -457,14 +579,19 @@ public class ValueModifier {
         // 加法修改器（只包含特定标签）
         double additiveSum = modifiersByType.get(ModifierType.ADDITIVE).values().stream()
                 .filter(mod -> mod.getTag().equals(includeTag))
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority))
                 .mapToDouble(TemporaryModifier::getValue)
                 .sum();
 
         // 乘法修改器（只包含特定标签）
         double multSum = modifiersByType.get(ModifierType.MULTIPLICATIVE).values().stream()
                 .filter(mod -> mod.getTag().equals(includeTag))
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority))
                 .mapToDouble(TemporaryModifier::getValue)
                 .sum();
+
+        // 确保乘法总和不低于-1（避免负值或零值）
+        multSum = Math.max(multSum, -0.99);
 
         // 计算结果
         double result = (modifiedBase + additiveSum) * (1 + multSum);
@@ -485,6 +612,7 @@ public class ValueModifier {
         // 最小值限制（只包含特定标签）
         Optional<Double> minLimit = modifiersByType.get(ModifierType.MIN_LIMIT).values().stream()
                 .filter(mod -> mod.getTag().equals(includeTag))
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority))
                 .map(TemporaryModifier::getValue)
                 .max(Double::compare);
 
@@ -495,6 +623,7 @@ public class ValueModifier {
         // 最大值限制（只包含特定标签）
         Optional<Double> maxLimit = modifiersByType.get(ModifierType.MAX_LIMIT).values().stream()
                 .filter(mod -> mod.getTag().equals(includeTag))
+                .sorted(Comparator.comparingInt(TemporaryModifier::getPriority))
                 .map(TemporaryModifier::getValue)
                 .min(Double::compare);
 
@@ -832,7 +961,8 @@ public class ValueModifier {
          * 更新缓存的值
          */
         void update() {
-            this.cachedValue = calculateValue(filter);
+            double rawValue = calculateValue(filter);
+            this.cachedValue = applyCalculationPrecision(rawValue);
         }
 
         /**
@@ -841,6 +971,14 @@ public class ValueModifier {
          */
         public double getValue() {
             return cachedValue;
+        }
+
+        /**
+         * 获取格式化的值
+         * @return 格式化后的字符串
+         */
+        public String getFormattedValue() {
+            return applyDisplayFormat(cachedValue);
         }
 
         /**
@@ -930,7 +1068,7 @@ public class ValueModifier {
 
         @Override
         public String toString() {
-            return Double.toString(cachedValue);
+            return applyDisplayFormat(cachedValue);
         }
     }
 
@@ -953,6 +1091,8 @@ public class ValueModifier {
             double baseMultSum = value.getModifiersByType(ModifierType.BASE_MULTIPLICATIVE).stream()
                     .mapToDouble(TemporaryModifier::getValue)
                     .sum();
+            // 确保基础值乘法总和不低于-1（避免负值或零值）
+            baseMultSum = Math.max(baseMultSum, -0.99);
             this.baseMultiplierEffect = currentBaseValue * baseMultSum;
 
             // 加法效果
@@ -964,6 +1104,8 @@ public class ValueModifier {
             double multSum = value.getModifiersByType(ModifierType.MULTIPLICATIVE).stream()
                     .mapToDouble(TemporaryModifier::getValue)
                     .sum();
+            // 确保乘法总和不低于-1（避免负值或零值）
+            multSum = Math.max(multSum, -0.99);
             double afterAdditive = currentBaseValue * (1 + baseMultSum) + additiveEffect;
             this.multiplicativeEffect = afterAdditive * multSum;
 
@@ -1026,114 +1168,5 @@ public class ValueModifier {
             sb.append(String.format("最终值: %.2f", finalValue));
             return sb.toString();
         }
-    }
-
-    public static void main(String[] args) {
-        // 创建一个攻击力属性，初始值为100
-        ValueModifier attack = new ValueModifier(100);
-
-        System.out.println("=== 基本功能演示 ===");
-
-        // 永久修改：升级增加20点攻击力
-        attack.modifyBaseValue(20, "升级");
-        System.out.println("升级后基础攻击力: " + attack.getCurrentBaseValue());
-
-        // 添加各类修改器
-        // 1. 基础值乘法修改器（直接对基础值生效）
-        attack.addBaseMultiplicativeModifier("talent", 0.2, "character.talent");  // +20%基础攻击力
-
-        // 2. 加法修改器
-        attack.addAdditiveModifier("weapon", 50, "equipment.weapon");  // 武器+50攻击
-        attack.addAdditiveModifier("ring", 15, "equipment.accessory");  // 戒指+15攻击
-
-        // 3. 乘法修改器
-        attack.addMultiplicativeModifier("buff", 0.3, "buff.strength");  // 力量增强+30%
-
-        // 4. 限制修改器
-        attack.addMinLimitModifier("minDamage", 150, "system.limit");  // 最小伤害不低于150
-        attack.addMaxLimitModifier("maxDamage", 300, "system.limit");  // 最大伤害不超过300
-
-        // 获取最终攻击力
-        System.out.println("最终攻击力: " + attack.getFinalValue());
-
-        System.out.println("\n=== 优先级系统演示 ===");
-
-        // 清除所有修改器
-        attack.clearAllModifiers();
-
-        // 添加不同优先级的乘法修改器
-        attack.addMultiplicativeModifier("buff1", 0.5, "buff", ValueModifier.PRIORITY_HIGH);  // 高优先级
-        attack.addMultiplicativeModifier("buff2", 0.3, "buff", ValueModifier.PRIORITY_LOW);   // 低优先级
-
-        System.out.println("带优先级的攻击力: " + attack.getFinalValue());
-
-        // 修改优先级
-        attack.setModifierPriority("buff2", ValueModifier.PRIORITY_HIGHEST);  // 设为最高优先级
-        System.out.println("修改优先级后攻击力: " + attack.getFinalValue());
-
-        System.out.println("\n=== 基础值乘法修改器演示 ===");
-
-        // 清除所有修改器
-        attack.clearAllModifiers();
-
-        // 添加基础值乘法修改器
-        attack.addBaseMultiplicativeModifier("talent", 0.2, "character.talent");  // +20%基础值
-
-        // 添加普通乘法修改器
-        attack.addMultiplicativeModifier("buff", 0.5, "buff");  // +50%总值
-
-        System.out.println("基础值: " + attack.getCurrentBaseValue());
-        System.out.println("最终值: " + attack.getFinalValue());
-
-        System.out.println("\n=== 限制修改器演示 ===");
-
-        // 清除所有修改器
-        attack.clearAllModifiers();
-
-        // 添加大量加成
-        attack.addBaseMultiplicativeModifier("talent", 0.5, "character.talent");
-        attack.addAdditiveModifier("weapon", 100, "equipment");
-        attack.addMultiplicativeModifier("buff", 1.0, "buff");  // +100%
-
-        System.out.println("无限制攻击力: " + attack.getFinalValue());
-
-        // 添加最大值限制
-        attack.addMaxLimitModifier("maxDamage", 250, "system.limit");
-        System.out.println("添加上限后攻击力: " + attack.getFinalValue());
-
-        // 添加最小值限制
-        attack.clearAllModifiers();
-        attack.addMinLimitModifier("minDamage", 200, "system.limit");
-        System.out.println("只有下限时攻击力: " + attack.getFinalValue());
-
-        System.out.println("\n=== 限制器冲突演示 ===");
-
-        // 清除所有修改器
-        attack.clearAllModifiers();
-
-        // 添加冲突的限制器
-        attack.addMinLimitModifier("minDamage", 250, "system.limit", ValueModifier.PRIORITY_LOW);
-        attack.addMaxLimitModifier("maxDamage", 200, "system.limit", ValueModifier.PRIORITY_HIGH);
-
-        System.out.println("冲突限制器(最大值优先): " + attack.getFinalValue());
-
-        // 修改优先级
-        attack.setModifierPriority("minDamage", ValueModifier.PRIORITY_HIGHEST);
-        System.out.println("冲突限制器(最小值优先): " + attack.getFinalValue());
-
-        System.out.println("\n=== 值分析演示 ===");
-
-        // 清除所有修改器
-        attack.clearAllModifiers();
-
-        // 添加各种修改器
-        attack.addBaseMultiplicativeModifier("talent", 0.2, "character.talent");
-        attack.addAdditiveModifier("weapon", 50, "equipment.weapon");
-        attack.addMultiplicativeModifier("buff", 0.3, "buff");
-        attack.addMaxLimitModifier("maxDamage", 250, "system.limit");
-
-        // 创建值对象并分析
-        ValueModifier.ModifiedValue attackValue = attack.createModifiedValue();
-        System.out.println(attackValue.getValueBreakdown());
     }
 }

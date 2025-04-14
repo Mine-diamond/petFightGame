@@ -82,18 +82,18 @@ public class BattleSystem {
     }
 
     public boolean isBattleEnded(){
-        if(pet2.getCurrentHP() == 0 || pet1.getCurrentHP() == 0){
+        if(pet2.getStat().getHP().getValue().getValue() == 0 || pet1.getStat().getHP().getValue().getValue() == 0){
             return true;
         }
         return false;
     }
 
     public BattleResult determineWinner(){
-        if(pet2.getCurrentHP() <= 0 && pet1.getCurrentHP() <= 0){
+        if(pet2.getStat().getHP().getValue().getValue() <= 0 && pet1.getStat().getHP().getValue().getValue() <= 0){
             return BattleResult.DRAW;
-        } else if(pet2.getCurrentHP() <= 0){
+        } else if(pet2.getStat().getHP().getValue().getValue() <= 0){
             return BattleResult.A_WIN;
-        } else if (pet1.getCurrentHP() <= 0){
+        } else if (pet1.getStat().getHP().getValue().getValue() <= 0){
             return BattleResult.B_WIN;
         } else {
             return BattleResult.DRAW;
@@ -137,7 +137,7 @@ public class BattleSystem {
     }
 
     public static int getEnergyCost(int costEnergy, Pet pet){
-        return pet.getCurrentEnergy() - costEnergy >= 0 ? costEnergy : 0;
+        return pet.getStat().getEnergy().getValue().getValue() - costEnergy >= 0 ? costEnergy : 0;
     }
 
     public static int getRecover(int recover) {

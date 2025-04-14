@@ -1,57 +1,31 @@
 package com.main.pets;
 
 import com.main.classes.Element;
+import com.main.classes.PetStat;
 import com.main.skills.Skill;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 
-/**
- * 宠物抽象基类，定义了所有宠物的共有属性和行为
- */
 public abstract class Pet {
-
     enum Statue {
         Fight, Free
     }
-
-    //------------------------基本属性--------------------------
-    String name;//姓名
+    String name;//名称
     String type;//种类
+    PetStat stat;//宠物各个属性
+    Statue statue = Statue.Free;//状态
 
     int level;//等级
     int experience;//目前经验值
 
-    int baseMaxHP;//最大血量
-    int maxHP;//目前最大血量（技能或道具影响）
-    int currentHP;//现在血量
-
-    int baseMaxEnergy;//最大能量
-    int maxEnergy;//目前最大能量（技能或道具影响）
-    int currentEnergy;//现在能量
-
-    int baseAttack;//基础攻击力
-    int currentAttack;//现在攻击力（技能或道具影响）
-
-    int baseDefense;//基础防御力
-    int currentDefense;//现在防御力（技能或道具影响）
-
     Attributes attributes;//天赋
     Element[] elements;//元素
     LinkedHashSet<Skill> skills;//技能集合
+    HashMap<Integer,Integer> levelExpRequirements = new HashMap<>();//升级需要的经验值
     GrowthAttribute growth;//能力随等级成长曲线
 
-    Statue statue = Statue.Free;//状态
 
-    HashMap<Integer,Integer> levelExpRequirements = new HashMap<>();//升级需要的经验值
-
-    //------------------------构造方法--------------------------
-    /**
-     * 宠物构造函数
-     * @param level 初始等级
-     * @param attributes 天赋属性
-     * @param skills 初始技能集
-     */
     public Pet(int level, Attributes attributes, LinkedHashSet<Skill> skills) {
         this.level = level;
         this.attributes = attributes;
@@ -63,7 +37,7 @@ public abstract class Pet {
         unifiedValue();
     }
 
-    //------------------------抽象方法与内部类--------------------------
+
     /**
      * 创建宠物成长属性的抽象方法，由子类实现
      */
@@ -79,34 +53,27 @@ public abstract class Pet {
         public abstract int getEnergyGrowth();
     }
 
-    //------------------------属性计算方法--------------------------
-    /**
-     * 根据等级和天赋设置基础属性值
-     */
-    protected void setBaseValue() {
+    public void setBaseValue(){
         double attackMultiplier = attributes.getAttackMultiplier();
         double defenseMultiplier = attributes.getDefenseMultiplier();
         double hpMultiplier = attributes.getHPMultiplier();
         double energyMultiplier = attributes.getEnergyMultiplier();
 
-        baseMaxHP = (int) (growth.getHpGrowth() * level * hpMultiplier);
-        baseMaxEnergy = (int) (growth.getEnergyGrowth() * level * energyMultiplier);
-        baseAttack = (int) (growth.getAttackGrowth() * level * attackMultiplier);
-        baseDefense = (int) (growth.getDefenseGrowth() * level * defenseMultiplier);
+        stat.getHP().setBaseMaxValue((growth.getHpGrowth() * level * hpMultiplier),"初始化");
+        stat.getEnergy().setBaseMaxValue((growth.getEnergyGrowth() * level * energyMultiplier),"初始化");
+        stat.getBaseAttack().setBaseValue((growth.getAttackGrowth() * level * attackMultiplier),"初始化");
+        stat.getBaseDefense().setBaseValue((growth.getDefenseGrowth() * level * defenseMultiplier),"初始化");
     }
 
-    /**
-     * 统一更新当前属性为基础属性值
-     */
-    public void unifiedValue() {
-        maxHP = baseMaxHP;
-        currentHP = baseMaxHP;
+    public void unifiedValue(){
+        stat.getHP().unifiedAll();
+        stat.getEnergy().unifiedAll();
+        stat.getBaseAttack().clearAllModifiers();
+        stat.getBaseDefense().clearAllModifiers();
+    }
 
-        maxEnergy = baseMaxEnergy;
-        currentEnergy = baseMaxEnergy;
-
-        currentDefense = baseDefense;
-        currentAttack = baseAttack;
+    public PetStat getStat() {
+        return stat;
     }
 
     //------------------------基本信息相关方法--------------------------
@@ -171,142 +138,6 @@ public abstract class Pet {
         }
     }
 
-    //------------------------血量相关方法--------------------------
-    public int getBaseMaxHP() {
-        return baseMaxHP;
-    }
-
-    public int getMaxHP() {
-        return maxHP;
-    }
-
-    public int getCurrentHP() {
-        return currentHP;
-    }
-
-    /**
-     * 增加血量
-     * @param hp 要增加的血量
-     */
-    public void addHP(int hp) {
-        if(hp < 0) {
-            throw new IllegalArgumentException("hp must be a positive integer");
-        }
-
-        if (this.currentHP + hp >= maxHP) {
-            currentHP = maxHP;
-        } else {
-            currentHP += hp;
-        }
-    }
-
-    /**
-     * 减少血量
-     * @param hp 要减少的血量
-     * @return 是否死亡（HP降为0）
-     */
-    public boolean removeHP(int hp) {
-        if(hp < 0) {
-            throw new IllegalArgumentException("hp must be a positive integer");
-        }
-
-        if (this.currentHP - hp >= 0) {
-            currentHP -= hp;
-            return false;
-        } else {
-            this.currentHP = 0;
-            return true;
-        }
-    }
-
-    public boolean canRemoveHP(int hp) {
-        if(hp < 0) {
-            throw new IllegalArgumentException("hp must be a positive integer");
-        }
-
-        if (this.currentHP - hp >= 0) {
-            return true;
-        }
-
-        return false;
-    }
-
-    //------------------------能量相关方法--------------------------
-    public int getMaxEnergy() {
-        return maxEnergy;
-    }
-
-    public int getBaseMaxEnergy() {
-        return baseMaxEnergy;
-    }
-
-    public int getCurrentEnergy() {
-        return currentEnergy;
-    }
-
-    /**
-     * 增加能量
-     * @param energy 要增加的能量
-     */
-    public void addEnergy(int energy) {
-        if(energy < 0) {
-            throw new IllegalArgumentException("energy must be a positive integer");
-        }
-
-        if (this.currentEnergy + energy >= maxEnergy) {
-            currentEnergy = maxEnergy;
-        } else {
-            currentEnergy += energy;
-        }
-    }
-
-    /**
-     * 减少能量
-     * @param energy 要减少的能量
-     * @return 能量是否耗尽
-     */
-    public boolean removeEnergy(int energy) {
-        if(energy < 0) {
-            throw new IllegalArgumentException("energy must be a positive integer");
-        }
-
-        if (this.currentEnergy - energy >= 0) {
-            currentEnergy -= energy;
-            return false;
-        } else {
-            this.currentEnergy = 0;
-            return true;
-        }
-    }
-
-    public boolean canRemoveEnergy(int energy) {
-        if(energy < 0) {
-            throw new IllegalArgumentException("energy must be a positive integer");
-        }
-        if (this.currentEnergy - energy >= 0) {
-            return true;
-        }
-        return false;
-    }
-
-    //------------------------攻击与防御相关方法--------------------------
-    public int getBaseAttack() {
-        return baseAttack;
-    }
-
-    public int getCurrentAttack() {
-        return currentAttack;
-    }
-
-    public int getBaseDefense() {
-        return baseDefense;
-    }
-
-    public int getCurrentDefense() {
-        return currentDefense;
-    }
-
-
     //------------------------技能相关方法--------------------------
     /**
      * 添加技能
@@ -359,7 +190,7 @@ public abstract class Pet {
     public String toString() {
         return String.format(
                 "%s [name=%s, type=%s, level=%d, exp=%d, HP=%d/%d,Energy=%d/%d, ATK=%d, DEF=%d]",
-                getClass().getSimpleName(), name, type, level, experience, currentHP, maxHP,currentEnergy, maxEnergy,currentAttack, currentDefense
+                getClass().getSimpleName(), name, type, level, experience, stat.getHP().getValue(), stat.getHP().getCurrentMaxValue(),stat.getEnergy().getValue(), stat.getEnergy().getCurrentMaxValue(),stat.getCurrentAttack(), stat.getCurrentDefense()
         );
     }
 }
