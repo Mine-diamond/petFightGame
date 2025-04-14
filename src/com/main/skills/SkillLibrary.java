@@ -2,7 +2,33 @@ package com.main.skills;
 
 import com.main.classes.Element;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class SkillLibrary {
+
+    public static List<Skill> getAllSkills() {
+        List<Skill> skills = new ArrayList<>();
+        // 通过反射获取所有字段
+        Field[] fields = SkillLibrary.class.getDeclaredFields();
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers())
+                    && field.getType().equals(Skill.class)) {
+                try {
+                    Skill skill = (Skill) field.get(null);
+                    if (skill != null) {
+                        skills.add(skill);
+                    }
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return Collections.unmodifiableList(skills);
+    }
 
     public static final Skill skillFireBall = new Skill.SkillBuilder()
             .setName("火球术")
@@ -13,8 +39,8 @@ public class SkillLibrary {
             .setDescription("释放火球产生伤害")
             .setEffect(
                     (caster, target) -> {
-                        double damage = caster.getStat().getCurrentAttack().getValue();
-                        target.getStat().getHP().removeValue(damage);
+                        double damage = caster.getCurrentAttack();
+                        target.removeHP(damage);
                         }
 
             ).build();
@@ -28,8 +54,8 @@ public class SkillLibrary {
             .setDescription("用力震地，产生伤害")
             .setEffect(
                     (caster, target) -> {
-                        double damage = caster.getStat().getCurrentAttack().getValue();
-                        target.getStat().getHP().removeValue(damage);
+                        double damage = caster.getCurrentAttack();
+                        target.removeHP(damage);
                     }
 
             ).build();
@@ -57,8 +83,8 @@ public class SkillLibrary {
             .setDescription("恢复25%血量和50%能量")
             .setEffect(
                     (caster, target) -> {
-                        caster.getStat().getHP().addValue((int) (caster.getStat().getHP().getCurrentMaxValue() * 0.3));
-                        caster.getStat().getEnergy().addValue((int) (caster.getStat().getEnergy().getCurrentMaxValue() * 0.5));
+                        caster.addHP(caster.getMaxHP() * 0.3);
+                        caster.getStat().getEnergy().addValue(caster.getMaxEnergy() * 0.5);
                     }
 
             ).build();

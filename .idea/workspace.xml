@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="重构Pet中的数值管理">
+    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="将部分方法暴露到了Pet类下">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/game/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/pets/Pet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/Pet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/skills/SkillLibrary.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/SkillLibrary.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +105,7 @@
       <workItem from="1744347192756" duration="6213000" />
       <workItem from="1744445197265" duration="616000" />
       <workItem from="1744513312520" duration="4009000" />
-      <workItem from="1744629620181" duration="7317000" />
+      <workItem from="1744629620181" duration="9254000" />
     </task>
     <task id="LOCAL-00001" summary="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
       <option name="closed" value="true" />
@@ -177,7 +179,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744635481775</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="将部分方法暴露到了Pet类下">
+      <option name="closed" value="true" />
+      <created>1744637085481</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1744637085481</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -216,7 +226,8 @@
     <MESSAGE value="添加了ValueModifier，重构了Pet类的数据管理" />
     <MESSAGE value="完全重构ModifiedValue" />
     <MESSAGE value="重构Pet中的数值管理" />
-    <option name="LAST_COMMIT_MESSAGE" value="重构Pet中的数值管理" />
+    <MESSAGE value="将部分方法暴露到了Pet类下" />
+    <option name="LAST_COMMIT_MESSAGE" value="将部分方法暴露到了Pet类下" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

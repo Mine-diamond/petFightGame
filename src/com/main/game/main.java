@@ -43,6 +43,8 @@ public class main {//仅测试用
         System.out.println(player.getName());
         System.out.println(player.wallet);
 
+        SkillLibrary.getAllSkills().forEach(System.out::println);
+
         BattleSystem battleSystem = new BattleSystem(pet1, pet2,10);
 
         battleSystem.battleFlow();

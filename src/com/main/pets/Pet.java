@@ -54,15 +54,22 @@ public abstract class Pet {
     }
 
     public void setBaseValue(){
+
         double attackMultiplier = attributes.getAttackMultiplier();
         double defenseMultiplier = attributes.getDefenseMultiplier();
         double hpMultiplier = attributes.getHPMultiplier();
         double energyMultiplier = attributes.getEnergyMultiplier();
 
-        stat.getHP().setBaseMaxValue((growth.getHpGrowth() * level * hpMultiplier),"初始化");
-        stat.getEnergy().setBaseMaxValue((growth.getEnergyGrowth() * level * energyMultiplier),"初始化");
-        stat.getBaseAttack().setBaseValue((growth.getAttackGrowth() * level * attackMultiplier),"初始化");
-        stat.getBaseDefense().setBaseValue((growth.getDefenseGrowth() * level * defenseMultiplier),"初始化");
+        if(this.stat == null ){
+            stat = new PetStat((growth.getHpGrowth() * level * hpMultiplier),(growth.getEnergyGrowth() * level * energyMultiplier),(growth.getAttackGrowth() * level * attackMultiplier),(growth.getDefenseGrowth() * level * defenseMultiplier));
+        } else {
+            stat.getHP().setBaseMaxValue((growth.getHpGrowth() * level * hpMultiplier),"更新基值");
+            stat.getEnergy().setBaseMaxValue((growth.getEnergyGrowth() * level * energyMultiplier),"更新基值");
+            stat.getBaseAttack().setBaseValue((growth.getAttackGrowth() * level * attackMultiplier),"更新基值");
+            stat.getBaseDefense().setBaseValue((growth.getDefenseGrowth() * level * defenseMultiplier),"更新基值");
+        }
+
+
     }
 
     public void unifiedValue(){
@@ -492,8 +499,8 @@ public abstract class Pet {
     @Override
     public String toString() {
         return String.format(
-                "%s [name=%s, type=%s, level=%d, exp=%d, HP=%d/%d,Energy=%d/%d, ATK=%d, DEF=%d]",
-                getClass().getSimpleName(), name, type, level, experience, stat.getHP().getValue(), stat.getHP().getCurrentMaxValue(),stat.getEnergy().getValue(), stat.getEnergy().getCurrentMaxValue(),stat.getCurrentAttack(), stat.getCurrentDefense()
+                "%s [name=%s, type=%s, level=%d, exp=%d, HP=%.4f/%.4f,Energy=%.4f/%.4f, ATK=%.4f, DEF=%.4f]",
+                getClass().getSimpleName(), name, type, level, experience, getCurrentHP(), getMaxHP(),getCurrentEnergy(), getMaxEnergy(),getCurrentAttack(), getCurrentDefense()
         );
     }
 }
