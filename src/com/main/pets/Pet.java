@@ -152,7 +152,7 @@ public abstract class Pet {
      * @return 是否成功添加
      */
     public boolean addSkills(Skill skill) {
-        if(Skill.ifAbleAddSkill(skill,this.elements)){
+        if(Skill.isAbleAddSkill(skill,this.elements)){
             return this.skills.add(skill);
         }
         return false;
@@ -179,6 +179,32 @@ public abstract class Pet {
     public Skill[] getSkillsArray() {
         return this.skills.toArray(new Skill[0]);
     }
+
+    //------------------------元素相关方法--------------------------
+    public Element[] getElementArray() {
+        return elements;
+    }
+
+    public Element[] getCounteredElement(){
+        Element[] counteredElements = new Element[elements.length];
+        for (int i = 0; i < elements.length; i++) {
+            counteredElements[i] = elements[i].getCounteredElement();
+        }
+        return counteredElements;
+    }
+
+    public boolean isCounteredBy(Element other) {
+        boolean result = false;
+        for (Element element : elements) {
+            result = element.counters(other);
+            if(result) {
+                break;
+            }
+        }
+        return result;
+    }
+
+
 
     //------------------------状态相关方法--------------------------
     /**

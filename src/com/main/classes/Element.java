@@ -21,4 +21,5 @@ public enum Element {
     }
 
     public boolean counters(Element other) {return this.counteredElement == other;}
+    public Element getCounteredElement() {return this.counteredElement;}
 }

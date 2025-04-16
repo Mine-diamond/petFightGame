@@ -313,7 +313,7 @@ public abstract class Pet_old {
      * @return 是否成功添加
      */
     public boolean addSkills(Skill skill) {
-        if(Skill.ifAbleAddSkill(skill,this.elements)){
+        if(Skill.isAbleAddSkill(skill,this.elements)){
             return this.skills.add(skill);
         }
         return false;

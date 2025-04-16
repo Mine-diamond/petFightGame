@@ -130,18 +130,4 @@ public class BattleSystem {
         return skill;
     }
 
-
-
-    public static int getAttackValue(int attcak){//还没写好
-        return 0;
-    }
-
-    public static int getEnergyCost(int costEnergy, Pet pet){
-        return pet.getStat().getEnergy().getValue().getValue() - costEnergy >= 0 ? costEnergy : 0;
-    }
-
-    public static int getRecover(int recover) {
-        return recover;
-    }
-
 }

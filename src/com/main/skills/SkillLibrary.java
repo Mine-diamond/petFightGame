@@ -30,6 +30,21 @@ public class SkillLibrary {
         return Collections.unmodifiableList(skills);
     }
 
+    public static final Skill skillBasicAttack = new Skill.SkillBuilder()
+            .setName("基础攻击")
+            .setElement(Element.noElement)
+            .setType(Skill.SkillType.ATTACK)
+            .setTargetType(Skill.TargetType.ENEMY)
+            .setEnergyCost(0,true)
+            .setDescription("普通攻击，不消耗能量")
+            .setEffect(
+                    (caster, target) -> {
+                        double damage = caster.getCurrentAttack();
+                        target.removeHP(damage);
+                    }
+
+            ).build();
+
     public static final Skill skillFireBall = new Skill.SkillBuilder()
             .setName("火球术")
             .setElement(Element.fire)
@@ -84,7 +99,7 @@ public class SkillLibrary {
             .setEffect(
                     (caster, target) -> {
                         caster.addHP(caster.getMaxHP() * 0.3);
-                        caster.getStat().getEnergy().addValue(caster.getMaxEnergy() * 0.5);
+                        caster.addEnergy(caster.getMaxEnergy() * 0.5);
                     }
 
             ).build();

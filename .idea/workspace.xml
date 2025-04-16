@@ -4,10 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="将部分方法暴露到了Pet类下">
+    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="修复部分错误">
+      <change afterPath="$PROJECT_DIR$/src/com/main/classes/CombatUtil.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/game/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/Element.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/Element.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/BattleSystem.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/pets/Pet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/Pet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/pets/Pet_old.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/Pet_old.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/skills/Skill.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/Skill.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/skills/SkillLibrary.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/SkillLibrary.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -68,6 +72,10 @@
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;onboarding.tips.debug.path&quot;: &quot;E:/download/jintellitype-1.4.1/petFightGame/src/Main.java&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Global Libraries&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -105,7 +113,9 @@
       <workItem from="1744347192756" duration="6213000" />
       <workItem from="1744445197265" duration="616000" />
       <workItem from="1744513312520" duration="4009000" />
-      <workItem from="1744629620181" duration="9254000" />
+      <workItem from="1744629620181" duration="11557000" />
+      <workItem from="1744690592841" duration="17291000" />
+      <workItem from="1744794431165" duration="2178000" />
     </task>
     <task id="LOCAL-00001" summary="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
       <option name="closed" value="true" />
@@ -187,7 +197,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744637085481</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="修复部分错误">
+      <option name="closed" value="true" />
+      <created>1744639217037</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1744639217037</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -227,7 +245,8 @@
     <MESSAGE value="完全重构ModifiedValue" />
     <MESSAGE value="重构Pet中的数值管理" />
     <MESSAGE value="将部分方法暴露到了Pet类下" />
-    <option name="LAST_COMMIT_MESSAGE" value="将部分方法暴露到了Pet类下" />
+    <MESSAGE value="修复部分错误" />
+    <option name="LAST_COMMIT_MESSAGE" value="修复部分错误" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
