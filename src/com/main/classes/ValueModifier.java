@@ -1072,6 +1072,26 @@ public class ValueModifier {
         }
     }
 
+    public int getCalculationPrecision() {
+        return calculationPrecision;
+    }
+
+    public boolean isRoundingForCalculation() {
+        return roundingForCalculation;
+    }
+
+    public int getDisplayPrecision() {
+        return displayPrecision;
+    }
+
+    public boolean isRoundingForDisplay() {
+        return roundingForDisplay;
+    }
+
+    public String getFormatPattern() {
+        return formatPattern;
+    }
+
     /**
      * 值分析结果类，用于详细分析值的组成部分
      */
@@ -1142,6 +1162,9 @@ public class ValueModifier {
         public double getFinalValue() {
             return finalValue;
         }
+
+
+
 
         @Override
         public String toString() {
