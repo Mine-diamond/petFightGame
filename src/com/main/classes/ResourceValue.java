@@ -1,9 +1,13 @@
 package com.main.classes;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /*
  * 资源值类，用于表示游戏或应用中的资源（例如基础血量上限、当前血量上限、当前血量）。
  */
-
+@Setter
+@Getter
 public class ResourceValue {
     private ValueModifier baseMaxValue; // 基础最大值（可修改），如基础血量上限。
     private ValueModifier.ModifiedValue currentMaxValue; // 计算后的当前最大值，受modifier影响。
@@ -13,6 +17,17 @@ public class ResourceValue {
     enum tagFilter{
         INCLUDE, EXCLUDE
     }
+
+    //空构造器
+    public ResourceValue(){};
+
+    //fromDTO() 构造器
+    public ResourceValue(ValueModifier baseModifier, double currentValue) {
+        this.baseMaxValue = baseModifier;
+        this.currentMaxValue = baseModifier.createModifiedValue();
+        this.value = new ObservableDouble(currentValue);
+    }
+
 
     // 构造函数，传入基础值（例如基础血量），初始化所有数值。
     public ResourceValue(double baseValue) {

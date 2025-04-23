@@ -4,11 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="添加CombatUtil">
-      <change afterPath="$PROJECT_DIR$/src/com/main/storage/GsonTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/storage/ValueModifierDTO.java" afterDir="false" />
+    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="开始添加DTO">
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/gson_2_12_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/lombok.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/main/storage/ObservableDoubleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/main/storage/RVTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/main/storage/ResourceValueDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/petFightGame.iml" beforeDir="false" afterPath="$PROJECT_DIR$/petFightGame.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/ResourceValue.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/ResourceValue.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/main/classes/ValueModifier.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/ValueModifier.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/storage/GsonTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/storage/GsonTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/storage/ValueModifierDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/storage/ValueModifierDTO.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,10 +65,13 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.GsonTest.executor": "Run",
+    "Application.RVTest.executor": "Run",
     "Application.ValueModifier.executor": "Run",
     "Application.ValueModifierTest.executor": "Run",
     "Application.main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
@@ -115,7 +127,8 @@
       <workItem from="1744881274221" duration="602000" />
       <workItem from="1744961059244" duration="602000" />
       <workItem from="1744979694341" duration="1293000" />
-      <workItem from="1745297040133" duration="4891000" />
+      <workItem from="1745297040133" duration="8722000" />
+      <workItem from="1745398773656" duration="4349000" />
     </task>
     <task id="LOCAL-00001" summary="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
       <option name="closed" value="true" />
@@ -213,7 +226,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744803638482</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="开始添加DTO">
+      <option name="closed" value="true" />
+      <created>1745330263452</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1745330263452</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -255,7 +276,8 @@
     <MESSAGE value="将部分方法暴露到了Pet类下" />
     <MESSAGE value="修复部分错误" />
     <MESSAGE value="添加CombatUtil" />
-    <option name="LAST_COMMIT_MESSAGE" value="添加CombatUtil" />
+    <MESSAGE value="开始添加DTO" />
+    <option name="LAST_COMMIT_MESSAGE" value="开始添加DTO" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

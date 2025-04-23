@@ -4,21 +4,26 @@ import com.main.classes.ValueModifier;
 import com.main.classes.ValueModifier.ModifierType;
 import com.main.classes.ValueModifier.TemporaryModifier;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 public class ValueModifierDTO {
-    public double baseValue;
+    private double baseValue;
 
-    public List<TempModifierDTO> tempModifiers = new ArrayList<>();
+    private List<TempModifierDTO> tempModifiers = new ArrayList<>();
 
-    public int calculationPrecision = -1;
-    public boolean roundingForCalculation = true;
+    private int calculationPrecision = -1;
+    private boolean roundingForCalculation = true;
 
-    public int displayPrecision = -1;
-    public boolean roundingForDisplay = false;
+    private int displayPrecision = -1;
+    private boolean roundingForDisplay = false;
 
-    public String formatPattern = null;
+    private String formatPattern = null;
 
     public ValueModifierDTO() {}
 
@@ -52,12 +57,14 @@ public class ValueModifierDTO {
         return vm;
     }
 
+    @Getter
+    @Setter
     public static class TempModifierDTO {
-        public String id;
-        public String tag;
-        public String type; // "ADDITIVE", "MULTIPLICATIVE", etc.
-        public double value;
-        public int priority;
+        private String id;
+        private String tag;
+        private String type; // "ADDITIVE", "MULTIPLICATIVE", etc.
+        private double value;
+        private int priority;
 
         public TempModifierDTO() {}
 
@@ -81,4 +88,3 @@ public class ValueModifierDTO {
         }
     }
 }
-

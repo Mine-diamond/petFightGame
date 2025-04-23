@@ -1192,4 +1192,83 @@ public class ValueModifier {
             return sb.toString();
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        // 基础值信息
+        sb.append(String.format("ValueModifier[初始值:%.2f, 当前基础值:%.2f, 最终值:%.2f]\n",
+                initialBaseValue, currentBaseValue, getFinalValue()));
+
+        // 精度设置
+        sb.append("精度设置: ");
+        if (calculationPrecision >= 0) {
+            sb.append(String.format("计算精度:%d位(%s) ",
+                    calculationPrecision, roundingForCalculation ? "四舍五入" : "截断"));
+        } else {
+            sb.append("无计算精度限制 ");
+        }
+
+        if (displayPrecision >= 0) {
+            sb.append(String.format("显示精度:%d位(%s) ",
+                    displayPrecision, roundingForDisplay ? "四舍五入" : "截断"));
+        } else {
+            sb.append("无显示精度限制 ");
+        }
+
+        if (formatPattern != null) {
+            sb.append(String.format("格式化模式:\"%s\" ", formatPattern));
+        }
+        sb.append("\n");
+
+        // 活跃修改器统计
+        Map<ModifierType, Long> modifierCounts = getAllModifiers().stream()
+                .collect(Collectors.groupingBy(TemporaryModifier::getType, Collectors.counting()));
+
+        sb.append("修改器统计: ");
+        if (modifierCounts.isEmpty()) {
+            sb.append("无活跃修改器\n");
+        } else {
+            sb.append("\n");
+            for (ModifierType type : ModifierType.values()) {
+                long count = modifierCounts.getOrDefault(type, 0L);
+                if (count > 0) {
+                    sb.append(String.format("  %s: %d个\n", type.getDescription(), count));
+                }
+            }
+        }
+
+        // 历史修改记录统计
+        sb.append(String.format("永久修改历史: %d条记录\n", modificationHistory.size()));
+
+        // 详细值分析
+        if (!getAllModifiers().isEmpty()) {
+            ModifiedValue mv = createModifiedValue();
+            ValueBreakdown breakdown = mv.getValueBreakdown();
+            sb.append("值分析:\n");
+            sb.append(String.format("  基础值: %.2f\n", breakdown.getBaseValue()));
+
+            if (breakdown.getBaseMultiplierEffect() != 0) {
+                sb.append(String.format("  基础值乘法效果: %+.2f\n", breakdown.getBaseMultiplierEffect()));
+            }
+
+            if (breakdown.getAdditiveEffect() != 0) {
+                sb.append(String.format("  加法效果: %+.2f\n", breakdown.getAdditiveEffect()));
+            }
+
+            if (breakdown.getMultiplicativeEffect() != 0) {
+                sb.append(String.format("  乘法效果: %+.2f\n", breakdown.getMultiplicativeEffect()));
+            }
+
+            if (breakdown.getLimitEffect() != 0) {
+                sb.append(String.format("  限制效果: %+.2f\n", breakdown.getLimitEffect()));
+            }
+
+            sb.append(String.format("  最终值: %.2f [%s]\n", breakdown.getFinalValue(), getFormattedValue()));
+        }
+
+        return sb.toString();
+    }
+
 }
