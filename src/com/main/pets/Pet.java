@@ -3,27 +3,32 @@ package com.main.pets;
 import com.main.classes.Element;
 import com.main.classes.PetStat;
 import com.main.skills.Skill;
+import com.main.storage.PetDTO;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 
+@Setter
+@Getter
 public abstract class Pet {
-    enum Statue {
+    public enum Statue {
         Fight, Free
     }
-    String name;//名称
-    String type;//种类
-    PetStat stat;//宠物各个属性
-    Statue statue = Statue.Free;//状态
+    protected String name;//名称
+    protected String type;//种类
+    protected PetStat stat;//宠物各个属性
+    protected Statue statue = Statue.Free;//状态
 
-    int level;//等级
-    int experience;//目前经验值
+    protected int level;//等级
+    protected int experience;//目前经验值
 
-    Attributes attributes;//天赋
-    Element[] elements;//元素
-    LinkedHashSet<Skill> skills;//技能集合
-    HashMap<Integer,Integer> levelExpRequirements = new HashMap<>();//升级需要的经验值
-    GrowthAttribute growth;//能力随等级成长曲线
+    protected Attributes attributes;//天赋
+    protected Element[] elements;//元素
+    protected LinkedHashSet<Skill> skills;//技能集合
+    protected HashMap<Integer,Integer> levelExpRequirements = new HashMap<>();//升级需要的经验值
+    protected GrowthAttribute growth;//能力随等级成长曲线
 
 
     public Pet(int level, Attributes attributes, LinkedHashSet<Skill> skills) {
@@ -35,6 +40,10 @@ public abstract class Pet {
         //其他变量初始化
         setBaseValue();
         unifiedValue();
+    }
+
+    public Pet(PetDTO petDTO) {
+
     }
 
 

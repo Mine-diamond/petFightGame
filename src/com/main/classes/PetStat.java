@@ -8,6 +8,17 @@ public class PetStat {
     ValueModifier baseDefense;
     ValueModifier.ModifiedValue currentDefense;
 
+    public PetStat() {}
+
+    public PetStat(ResourceValue HP,ResourceValue energy,ValueModifier baseAttack,ValueModifier baseDefense) {
+        this.HP = HP;
+        this.energy = energy;
+        this.baseAttack = baseAttack;
+        this.baseDefense = baseDefense;
+        currentAttack = baseAttack.createModifiedValue();
+        currentDefense = baseDefense.createModifiedValue();
+    }
+
     public PetStat(double hp, double energy,double attack,double defense) {
         this.HP = new ResourceValue(hp);
         this.energy = new ResourceValue(energy);

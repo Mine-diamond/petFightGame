@@ -3,7 +3,11 @@ package com.main.skills;
 import com.main.classes.Element;
 import com.main.classes.ValueModifier;
 import com.main.pets.Pet;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 public abstract class Skill {
     // 基础属性（所有技能共有）
     protected String name;

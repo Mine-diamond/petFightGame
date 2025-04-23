@@ -30,6 +30,31 @@ public class SkillLibrary {
         return Collections.unmodifiableList(skills);
     }
 
+    public enum Type{
+        Origen,Chinese
+    }
+
+    public static Object getSkillByName(String name,Type type) throws ClassNotFoundException {
+        switch (type) {
+            case Origen:
+            try {
+                Field field = SkillLibrary.class.getField(name);
+                return field.get(null); // 静态字段用 null
+            } catch (Exception e) {
+                throw new RuntimeException("找不到静态对象：" + name + "." + name, e);
+            }
+            case Chinese:
+            List<Skill> skills = getAllSkills();
+            for (Skill skill : skills) {
+                if (name.equals(skill.getName())) {
+                    return skill;
+                }
+            }
+            throw new RuntimeException("找不到静态对象：" + name + "." + name);
+        }
+        return null;
+    }
+
     public static final Skill skillBasicAttack = new Skill.SkillBuilder()
             .setName("基础攻击")
             .setElement(Element.noElement)

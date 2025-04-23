@@ -8,7 +8,7 @@ public enum Element {
     fire,
     noElement;
 
-    private Element counteredElement;
+    private transient Element counteredElement;
 
     // 使用静态初始化块设置相克关系
     static {

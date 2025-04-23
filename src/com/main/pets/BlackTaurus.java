@@ -11,7 +11,7 @@ public class BlackTaurus extends Pet {
     public BlackTaurus(int level, Attributes attributes, LinkedHashSet<Skill> skills) {
         super(level, attributes, skills);
         this.name = "黑金牛";
-        this.type = "黑金牛";
+        this.type = "BlackTaurus";
         this.elements = new Element[]{Element.earth}; // 明确元素属性
         for (int i = 0;i < 50;i++){
             levelExpRequirements.put(i+1,50 + 30*i);

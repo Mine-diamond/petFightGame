@@ -1,17 +1,25 @@
 package com.main.game;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.main.classes.*;
 import com.main.pets.Attributes;
 import com.main.pets.BlackTaurus;
 import com.main.pets.FireFox;
 import com.main.pets.Pet;
 import com.main.skills.SkillLibrary;
+import com.main.storage.PlayerDTO;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Scanner;
 
 public class main {//仅测试用
+
+    public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
@@ -47,6 +55,12 @@ public class main {//仅测试用
 
         BattleSystem battleSystem = new BattleSystem(pet1, pet2,10);
 
-        battleSystem.battleFlow();
+        PlayerDTO playerDTO = new PlayerDTO(player);
+
+        try (FileWriter fw = new FileWriter("playerSave.json")){
+            gson.toJson(playerDTO,fw);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

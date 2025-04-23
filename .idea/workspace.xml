@@ -4,20 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="开始添加DTO">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/gson_2_12_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/lombok.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/storage/ObservableDoubleDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/storage/RVTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/main/storage/ResourceValueDTO.java" afterDir="false" />
+    <list default="true" id="2e4393f9-57c8-411f-ba1f-75e9a10bcf76" name="Changes" comment="添加Gson和Lomhok依赖">
+      <change afterPath="$PROJECT_DIR$/src/com/main/storage/PetDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/main/storage/PetSaveTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/main/storage/PetStatDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/main/storage/PlayerDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/main/storage/WalletDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/petFightGame.iml" beforeDir="false" afterPath="$PROJECT_DIR$/petFightGame.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/classes/ResourceValue.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/ResourceValue.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/classes/ValueModifier.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/ValueModifier.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/storage/GsonTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/storage/GsonTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/main/storage/ValueModifierDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/storage/ValueModifierDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/Element.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/Element.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/PetStat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/PetStat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/classes/Wallet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/classes/Wallet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/game/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/game/main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/pets/BlackTaurus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/BlackTaurus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/pets/FireFox.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/FireFox.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/pets/Pet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/pets/Pet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/skills/Skill.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/Skill.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/main/skills/SkillLibrary.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/main/skills/SkillLibrary.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,10 +68,12 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.GsonTest.executor": "Run",
+    "Application.PetSaveTest.executor": "Run",
     "Application.RVTest.executor": "Run",
     "Application.ValueModifier.executor": "Run",
     "Application.ValueModifierTest.executor": "Run",
     "Application.main.executor": "Run",
+    "Application.test.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
@@ -128,7 +132,9 @@
       <workItem from="1744961059244" duration="602000" />
       <workItem from="1744979694341" duration="1293000" />
       <workItem from="1745297040133" duration="8722000" />
-      <workItem from="1745398773656" duration="4349000" />
+      <workItem from="1745398773656" duration="5774000" />
+      <workItem from="1745406316417" duration="79000" />
+      <workItem from="1745406543296" duration="13383000" />
     </task>
     <task id="LOCAL-00001" summary="first commit，添加了Pet类与FireFox子类，但是还没有做完。">
       <option name="closed" value="true" />
@@ -234,7 +240,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745330263452</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="添加Gson和Lomhok依赖">
+      <option name="closed" value="true" />
+      <created>1745403744423</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1745403744423</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -277,7 +291,8 @@
     <MESSAGE value="修复部分错误" />
     <MESSAGE value="添加CombatUtil" />
     <MESSAGE value="开始添加DTO" />
-    <option name="LAST_COMMIT_MESSAGE" value="开始添加DTO" />
+    <MESSAGE value="添加Gson和Lomhok依赖" />
+    <option name="LAST_COMMIT_MESSAGE" value="添加Gson和Lomhok依赖" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
