@@ -1,5 +1,7 @@
 # 宠物对战游戏
 
+![构建状态](https://img.shields.io/github/actions/workflow/status/Mine-diamond/petFightGame/maven.yml?branch=main&label=构建状态&style=flat-square)
+
 这是一个宠物对战游戏项目，作为个人练手和学习Java面向对象编程的练习项目开发。
 
 ## 目录
@@ -46,3 +48,4 @@
 ---
 
 此项目仅供个人学习和练习使用。
+
