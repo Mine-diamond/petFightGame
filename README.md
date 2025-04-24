@@ -29,9 +29,9 @@
 
 ## 运行说明
 
-1. 使用 IntelliJ IDEA 打开项目
-2. 确保配置了正确的 JDK
-3. 找到主类文件并运行
+1. 使用 IntelliJ IDEA 打开本项目
+2. 确保已正确配置 JDK 17 及 Maven 环境
+3. 找到主类 `main.java`，右键运行或执行 `mvn compile exec` 启动项目
 
 ## 项目架构
 
