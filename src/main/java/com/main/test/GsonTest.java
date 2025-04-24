@@ -1,14 +1,12 @@
-package com.main.storage;
+package com.main.test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
 import com.main.classes.ValueModifier;
+import com.main.storage.ValueModifierDTO;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 
 public class GsonTest {
 

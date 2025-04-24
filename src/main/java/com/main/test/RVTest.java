@@ -1,4 +1,4 @@
-package com.main.storage;
+package com.main.test;
 
 import com.main.classes.ResourceValue;
 import com.main.classes.ValueModifier;
@@ -8,6 +8,7 @@ import java.io.FileWriter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.main.storage.ResourceValueDTO;
 
 public class RVTest {
 

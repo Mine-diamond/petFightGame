@@ -21,6 +21,7 @@ public class main {//仅测试用
     public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public static void main(String[] args) {
+
         Scanner sc = new Scanner(System.in);
 
         Player player = new Player();
@@ -54,6 +55,8 @@ public class main {//仅测试用
         SkillLibrary.getAllSkills().forEach(System.out::println);
 
         BattleSystem battleSystem = new BattleSystem(pet1, pet2,10);
+
+        battleSystem.battleFlow();
 
         PlayerDTO playerDTO = new PlayerDTO(player);
 

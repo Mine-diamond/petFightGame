@@ -1,4 +1,4 @@
-package com.main.storage;
+package com.main.test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -7,6 +7,7 @@ import com.main.pets.BlackTaurus;
 import com.main.pets.Pet;
 import com.main.skills.Skill;
 import com.main.skills.SkillLibrary;
+import com.main.storage.PetDTO;
 
 import java.io.FileReader;
 import java.io.FileWriter;
