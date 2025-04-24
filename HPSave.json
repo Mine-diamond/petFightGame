@@ -1,0 +1,21 @@
+{
+  "baseMaxValue": {
+    "baseValue": 100.0,
+    "tempModifiers": [
+      {
+        "id": "test",
+        "tag": "test.id",
+        "type": "BASE_MULTIPLICATIVE",
+        "value": 1.5,
+        "priority": 500
+      }
+    ],
+    "calculationPrecision": -1,
+    "roundingForCalculation": true,
+    "displayPrecision": -1,
+    "roundingForDisplay": false
+  },
+  "value": {
+    "value": 285.0
+  }
+}

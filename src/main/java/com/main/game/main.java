@@ -56,7 +56,7 @@ public class main {//仅测试用
 
         BattleSystem battleSystem = new BattleSystem(pet1, pet2,10);
 
-        battleSystem.battleFlow();
+        //battleSystem.battleFlow();
 
         PlayerDTO playerDTO = new PlayerDTO(player);
 

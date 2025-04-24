@@ -1,0 +1,16 @@
+{
+  "baseValue": 15.0,
+  "tempModifiers": [
+    {
+      "id": "t1",
+      "tag": "one",
+      "type": "BASE_MULTIPLICATIVE",
+      "value": 2.0,
+      "priority": 1000
+    }
+  ],
+  "calculationPrecision": 3,
+  "roundingForCalculation": true,
+  "displayPrecision": -1,
+  "roundingForDisplay": false
+}
