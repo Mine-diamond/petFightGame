@@ -11,22 +11,37 @@ public class GameData {
 
     private PlayerDTO playerDTO;
 
-    private long Timestamp;
-    private int slot;
+    private long timestamp;
+    private long startTimestamp;
+    private int savedTime;
+    private String saveName;
 
     public GameData(){}
-    public GameData(PlayerDTO playerDTO, int slot) {
+
+
+    public GameData(PlayerDTO playerDTO, String saveName) {
         this.playerDTO = playerDTO;
-        this.slot = slot;
-        Timestamp = System.currentTimeMillis();
+        this.saveName = saveName;
+        timestamp = System.currentTimeMillis();
+        startTimestamp = timestamp;
+        savedTime = 0;
     }
 
-    public Player toPlayer(int slot){
+
+    public Player toPlayer(){
         return playerDTO.toPlayer();
     }
 
     public void updateTimestamp(){
-        Timestamp = System.currentTimeMillis();
+        timestamp = System.currentTimeMillis();
+    }
+
+    public void addSavedTime(){
+        savedTime++;
+    }
+
+    public GameData toNewGameData(String saveName){
+        return new GameData(playerDTO, saveName);
     }
 
 }
