@@ -20,6 +20,7 @@ public abstract class FoodItem extends Item{
     //基本属性(FOOD)
     protected double healthRecovered = 0;
 
+
     protected FoodItem() {
         super("food","食物",Type.FOOD,"这是食物",Rarity.COMMON,true);
     }
@@ -41,20 +42,24 @@ public abstract class FoodItem extends Item{
         pet.addHP(healthRecovered);
     }
 
+    public void eat(int amount, Pet pet) {
+        pet.addHP(amount * healthRecovered);
+    }
+
     public static class FoodItemBuilder extends ItemBuilder {
-        private String name = "item";
-        private String chineseName = "物品";
-        private Type type = Type.NONE;
-        private String description = "这是一个物品";
-        private Rarity rarity = Rarity.COMMON;
-        private boolean canStack = false;
+        protected String name = "item";
+        protected String chineseName = "物品";
+        protected Type type = Type.NONE;
+        protected String description = "这是一个物品";
+        protected Rarity rarity = Rarity.COMMON;
+        protected boolean canStack = false;
 
         private double healthRecovered;
 
         public FoodItemBuilder setHealthRecovered(double healthRecovered) {this.healthRecovered = healthRecovered;return this;}
 
         public FoodItem build(){
-            FoodItem item = new FoodItem(name, type, description, rarity, canStack){};
+            FoodItem item = new FoodItem(super.name, super.type, super.description, super.rarity, super.canStack){};
             item.setHealthRecovered(healthRecovered);
             return item;
         }

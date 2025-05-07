@@ -83,6 +83,7 @@ public class ItemInventory {
         ItemInventory itemInventory = new ItemInventory();
         Item a = new FoodItem.FoodItemBuilder()
                 .setHealthRecovered(10)
+                .setName("Apple")
                 .build();
         itemInventory.addItem(a, 1);
         System.out.println(itemInventory.getItems());

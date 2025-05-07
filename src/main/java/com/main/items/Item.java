@@ -21,7 +21,7 @@ public abstract class Item{
 
     //稀有度
     public enum Rarity{
-        COMMON,RARE,EPIC
+        COMMON,RARE,EPIC,LEGENDARY,EXCLUSIVE
     }
 
     //基本属性(不可变)
@@ -124,12 +124,12 @@ public abstract class Item{
 
     //建造者类
     public static class ItemBuilder{
-        private String name = "item";
-        private String chineseName = "物品";
-        private Type type = Type.NONE;
-        private String description = "这是一个物品";
-        private Rarity rarity = Rarity.COMMON;
-        private boolean canStack = false;
+        protected String name = "item";
+        protected String chineseName = "物品";
+        protected Type type = Type.NONE;
+        protected String description = "这是一个物品";
+        protected Rarity rarity = Rarity.COMMON;
+        protected boolean canStack = false;
 
         public ItemBuilder(){}
         public ItemBuilder setName(String name){this.name = name; return this;}
