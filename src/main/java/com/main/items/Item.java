@@ -16,7 +16,7 @@ public abstract class Item{
 
     //种类
     public enum Type{
-        FOOD
+        NONE,FOOD,POTION
     }
 
     //稀有度
@@ -26,12 +26,25 @@ public abstract class Item{
 
     //基本属性(不可变)
     protected String name;
+    protected String chineseName;
     protected Type type;
     protected String description;
     protected Rarity rarity;
+    protected boolean canStack;
 
     //实例数据(可变)
     //这里有0个:),需子类定义
+
+    public Item(){}
+
+    public Item(String name,String ChineseName, Type type, String description, Rarity rarity, boolean canStack){
+        this.name = name;
+        this.chineseName = ChineseName;
+        this.type = type;
+        this.description = description;
+        this.rarity = rarity;
+        this.canStack = canStack;
+    }
 
     //基本方法
     public abstract void use(Player player,Pet pet1,Pet pet2);
@@ -109,6 +122,35 @@ public abstract class Item{
         R apply(T t, U u, V v);
     }
 
+    //建造者类
+    public static class ItemBuilder{
+        private String name = "item";
+        private String chineseName = "物品";
+        private Type type = Type.NONE;
+        private String description = "这是一个物品";
+        private Rarity rarity = Rarity.COMMON;
+        private boolean canStack = false;
+
+        public ItemBuilder(){}
+        public ItemBuilder setName(String name){this.name = name; return this;}
+        public ItemBuilder setChineseName(String ChineseName){this.chineseName = ChineseName;return this;}
+        public ItemBuilder setType(Type type){this.type = type; return this;}
+        public ItemBuilder setDescription(String description){this.description = description;return this;}
+        public ItemBuilder setRarity(Rarity rarity){this.rarity = rarity; return this;}
+        public ItemBuilder setCanStack(boolean canStack){this.canStack = canStack;return this;}
+
+
+        public Item build(){
+            return new Item(name, chineseName,type,description,rarity,canStack) {
+                @Override
+                public void use(Player player, Pet pet1, Pet pet2) {
+                    //在子类中定义
+                }
+            };
+        }
+    }
+
+
     //仅测试用
     public String test(){
         System.out.println("Test");
@@ -121,9 +163,9 @@ public abstract class Item{
         StringBuilder sb = new StringBuilder();
         sb.append("物品信息：")
                 .append("名称：").append(name)
-                .append("类型：").append(type)
-                .append("描述：").append(description)
-                .append("稀有度：").append(rarity);
+                .append(", 类型：").append(type)
+                .append(", 描述：").append(description)
+                .append(", 稀有度：").append(rarity);
         return sb.toString();
     }
 
