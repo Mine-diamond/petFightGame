@@ -6,6 +6,7 @@ import com.main.pets.Pet;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -31,19 +32,28 @@ public abstract class Item{
     protected String description;
     protected Rarity rarity;
     protected boolean canStack;
+    // 物品类型ID（固定）
+    protected final String typeId;
+    // 实例ID（每个实例唯一）
+    protected final UUID instanceId;
 
     //实例数据(可变)
     //这里有0个:),需子类定义
 
-    public Item(){}
+    public Item(){
+        this.typeId = getClass().getName();
+        this.instanceId = UUID.randomUUID();
+    }
 
-    public Item(String name,String ChineseName, Type type, String description, Rarity rarity, boolean canStack){
+    public Item(String name,String ChineseName, Type type, String description, Rarity rarity, boolean canStack, String typeId){
         this.name = name;
         this.chineseName = ChineseName;
         this.type = type;
         this.description = description;
         this.rarity = rarity;
         this.canStack = canStack;
+        this.typeId = typeId;
+        this.instanceId = UUID.randomUUID();
     }
 
     //基本方法
@@ -130,6 +140,7 @@ public abstract class Item{
         protected String description = "这是一个物品";
         protected Rarity rarity = Rarity.COMMON;
         protected boolean canStack = false;
+        protected String typeId;
 
         public ItemBuilder(){}
         public ItemBuilder setName(String name){this.name = name; return this;}
@@ -138,17 +149,59 @@ public abstract class Item{
         public ItemBuilder setDescription(String description){this.description = description;return this;}
         public ItemBuilder setRarity(Rarity rarity){this.rarity = rarity; return this;}
         public ItemBuilder setCanStack(boolean canStack){this.canStack = canStack;return this;}
+        public ItemBuilder setTypeId(String typeId){this.typeId = typeId;return this;}
 
 
         public Item build(){
-            return new Item(name, chineseName,type,description,rarity,canStack) {
+            return new Item(name, chineseName,type,description,rarity,canStack,typeId) {
                 @Override
                 public void use(Player player, Pet pet1, Pet pet2) {
                     //在子类中定义
                 }
+
+                @Override
+                public Item newInstant() {
+                    return null;
+                }
+
+                @Override
+                public Item newInstant(UUID uuid) {
+                    return null;
+                }
+
             };
         }
     }
+
+    //深拷贝构造器
+    public Item(Item other){
+        this.name = other.name;
+        this.chineseName = other.chineseName;
+        this.type = other.type;
+        this.description = other.description;
+        this.rarity = other.rarity;
+        this.canStack = other.canStack;
+        this.typeId = other.typeId;
+        this.instanceId = UUID.randomUUID();
+    }
+
+    //深拷贝构造器,指定UUID
+    public Item(Item other,UUID uuid){
+        this.name = other.name;
+        this.chineseName = other.chineseName;
+        this.type = other.type;
+        this.description = other.description;
+        this.rarity = other.rarity;
+        this.canStack = other.canStack;
+        this.typeId = other.typeId;
+        this.instanceId = uuid;
+    }
+
+    //创建新实例
+    public abstract Item newInstant();
+
+    //创建新实例,指定UUID
+    public abstract Item newInstant(UUID uuid);
 
 
     //仅测试用
@@ -170,6 +223,3 @@ public abstract class Item{
     }
 
 }
-
-
-

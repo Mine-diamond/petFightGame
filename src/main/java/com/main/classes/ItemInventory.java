@@ -2,6 +2,7 @@ package com.main.classes;
 
 import com.main.items.FoodItem;
 import com.main.items.Item;
+import com.main.pets.FireFox;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -87,6 +88,10 @@ public class ItemInventory {
                 .build();
         itemInventory.addItem(a, 1);
         System.out.println(itemInventory.getItems());
+        Item.with(a, FoodItem.class,food -> {
+            food.eat(new FireFox(1,null,null));
+            return food;
+        });
     }
 
 

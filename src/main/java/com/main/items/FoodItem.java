@@ -5,6 +5,8 @@ import com.main.pets.Pet;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 
 @Setter
 @Getter
@@ -22,15 +24,11 @@ public abstract class FoodItem extends Item{
 
 
     protected FoodItem() {
-        super("food","食物",Type.FOOD,"这是食物",Rarity.COMMON,true);
+        super("food","食物",Type.FOOD,"这是食物",Rarity.COMMON,true,"food");
     }
 
-    protected FoodItem(String name, Type type, String description, Rarity rarity, boolean canStack) {
-        this.name = name;
-        this.type = type;
-        this.description = description;
-        this.rarity = rarity;
-        this.canStack = canStack;
+    protected FoodItem(String name,String chineseName, Type type, String description, Rarity rarity, boolean canStack,String typeID) {
+        super(name,chineseName,type,description,rarity,canStack,typeID);
     }
 
     @Override
@@ -47,21 +45,34 @@ public abstract class FoodItem extends Item{
     }
 
     public static class FoodItemBuilder extends ItemBuilder {
-        protected String name = "item";
-        protected String chineseName = "物品";
-        protected Type type = Type.NONE;
-        protected String description = "这是一个物品";
-        protected Rarity rarity = Rarity.COMMON;
-        protected boolean canStack = false;
 
         private double healthRecovered;
 
         public FoodItemBuilder setHealthRecovered(double healthRecovered) {this.healthRecovered = healthRecovered;return this;}
 
         public FoodItem build(){
-            FoodItem item = new FoodItem(super.name, super.type, super.description, super.rarity, super.canStack){};
+            FoodItem item = new FoodItem(super.name,super.chineseName, super.type, super.description, super.rarity, super.canStack,super.typeId){};
             item.setHealthRecovered(healthRecovered);
             return item;
         }
     }
+
+    //深拷贝构造器
+    public FoodItem(FoodItem other){
+        super(other);
+        this.healthRecovered = other.healthRecovered;
+    }
+
+    //深拷贝构造器,指定UUID
+    public FoodItem(FoodItem other,UUID uuid){
+        super(other,uuid);
+        this.healthRecovered = other.healthRecovered;
+    }
+
+    //创建新实例
+    public FoodItem newInstant(){
+        return new FoodItem(this){};
+    }
+
+    public FoodItem newInstant(UUID uuid){return new FoodItem(this,uuid){};}
 }
